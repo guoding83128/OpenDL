@@ -1,9 +1,3 @@
-/**
- * @(#)ModelReplicaSplit.java, 2013-8-15. 
- * 
- * Copyright 2013 NetEase, Inc. All rights reserved.
- * NetEase PROPRIETARY/CONFIDENTIAL. Use is subject to license terms.
- */
 package org.spark.opendl.downpourSGD;
 
 import java.io.Serializable;
@@ -15,10 +9,25 @@ import spark.api.java.JavaPairRDD;
 import spark.api.java.JavaRDD;
 import spark.api.java.function.PairFunction;
 
+/**
+ * Samples split for Spark train work <p/>
+ * 
+ * @author GuoDing
+ * @since 2013-07-20
+ * @param <T>
+ */
 public final class ModelReplicaSplit<T> implements Serializable {
     private static final long serialVersionUID = 1L;
     private Random rand = new Random(System.currentTimeMillis());
 
+    /**
+     * Split the input samples (one each split for one ModelReplica)
+     * 
+     * @param input
+     * @param nrModelReplica
+     * @param cache
+     * @return
+     */
     public JavaPairRDD<Integer, List<T>> split(JavaRDD<T> input, int nrModelReplica, boolean cache) {
         JavaPairRDD<Integer, List<T>> output = input.map(new SplitModelReplica(nrModelReplica)).groupByKey();
         if (cache) {

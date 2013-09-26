@@ -5,14 +5,12 @@ import java.io.DataOutput;
 import java.io.IOException;
 import java.io.Serializable;
 import java.io.Writer;
-import java.util.List;
 
 import org.apache.log4j.Logger;
 import org.jblas.DoubleMatrix;
 import org.jblas.MatrixFunctions;
 import org.spark.opendl.downpourSGD.SGDPersistable;
 import org.spark.opendl.downpourSGD.SGDTrainConfig;
-import org.spark.opendl.downpourSGD.SampleVector;
 import org.spark.opendl.util.MyConjugateGradient;
 
 import cc.mallet.optimize.Optimizable;
@@ -153,13 +151,33 @@ public final class LR implements SGDPersistable, Serializable {
      * Gradient descent with mini-batch
      * 
      * @param config Train config
-     * @param samples Input train samples batch
+     * @param x_samples Input train samples X batch
+     * @param y_samples Input train samples Y batch
      * @param curr_w W param matrix of current epoch
      * @param curr_b B param vector of current epoch
      */
-    protected final void gradientUpdateMiniBatch(SGDTrainConfig config, List<SampleVector> samples, double[][] curr_w,
-            double[] curr_b) {
-
+    protected final void gradientUpdateMiniBatch(SGDTrainConfig config, DoubleMatrix x_samples, DoubleMatrix y_samples, DoubleMatrix curr_w, DoubleMatrix curr_b) {
+    	int nbr_samples = x_samples.getRows();
+    	DoubleMatrix curr_predict_y = x_samples.mmul(curr_w.transpose()).addiRowVector(curr_b);
+        softmax(curr_predict_y);
+        DoubleMatrix delta_b = y_samples.sub(curr_predict_y);
+        DoubleMatrix delta_w = delta_b.transpose().mmul(x_samples);
+        delta_b = delta_b.columnSums().divi(nbr_samples);
+        delta_w.divi(nbr_samples);
+        
+        if (config.isUseRegularization()) {
+            if (0 != config.getLamada1()) {
+                delta_w.addi(MatrixFunctions.signum(curr_w).mmuli(config.getLamada1()));
+                delta_b.addi(MatrixFunctions.signum(curr_b).mmuli(config.getLamada1()));
+            }
+            if (0 != config.getLamada2()) {
+                delta_w.addi(curr_w.mmul(config.getLamada2()));
+                delta_b.addi(curr_b.mmul(config.getLamada2()));
+            }
+        }
+        
+        curr_w.addi(delta_w.muli(config.getLearningRate()));
+        curr_b.addi(delta_b.muli(config.getLearningRate()));
     }
 
     /**

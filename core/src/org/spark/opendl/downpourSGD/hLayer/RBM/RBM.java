@@ -1,9 +1,3 @@
-/**
- * @(#)RBM.java, 2013-9-13. 
- * 
- * Copyright 2013 NetEase, Inc. All rights reserved.
- * NetEase PROPRIETARY/CONFIDENTIAL. Use is subject to license terms.
- */
 package org.spark.opendl.downpourSGD.hLayer.RBM;
 
 import org.apache.log4j.Logger;
@@ -129,4 +123,10 @@ public class RBM extends HiddenLayer {
             }
         }
     }
+
+	@Override
+	protected void reconstruct(double[] x, double[] reconstruct_x) {
+		// TODO Auto-generated method stub
+		
+	}
 }

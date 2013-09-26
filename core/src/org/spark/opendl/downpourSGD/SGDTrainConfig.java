@@ -4,6 +4,12 @@ import java.io.Serializable;
 
 import lombok.Data;
 
+/**
+ * DownpourSGD train work configuration parameter <p/>
+ * 
+ * @author GuoDing
+ * @since 2013-07-15
+ */
 @Data
 public class SGDTrainConfig implements Serializable {
     private static final long serialVersionUID = 1L;

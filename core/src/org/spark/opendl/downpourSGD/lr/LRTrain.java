@@ -14,10 +14,23 @@ import org.spark.opendl.downpourSGD.SampleVector;
 import spark.api.java.JavaPairRDD;
 import spark.api.java.JavaRDD;
 
+/**
+ * Logistic Regression(Softmax) train api <p/>
+ * 
+ * @author GuoDing
+ * @since 2013-08-01
+ */
 public final class LRTrain implements Serializable {
     private static final long serialVersionUID = 1L;
     private static final Logger logger = Logger.getLogger(LRTrain.class);
 
+    /**
+     * Standalone multiple threads train work
+     * 
+     * @param lr The LR node to be trained
+     * @param samples The input supervise samples
+     * @param config Specify the train configuration
+     */
     public static void train(LR lr, List<SampleVector> samples, SGDTrainConfig config) {
         int xy_n = (int) samples.size();
         int nrModelReplica = config.getNbrModelReplica();
@@ -112,6 +125,14 @@ public final class LRTrain implements Serializable {
         }
     }
 
+    /**
+     * Train the LR with Spark framework
+     * 
+     * @param lr The LR node to be trained
+     * @param samples The input supervise samples
+     * @param config Specify the train configuration
+     * @param cache Specify whether to store the samples into Spark cache
+     */
     public static void train(LR lr, JavaRDD<SampleVector> samples, SGDTrainConfig config, boolean cache) {
         long nbr_xy = samples.count();
         int nrModelReplica = config.getNbrModelReplica();

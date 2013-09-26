@@ -63,11 +63,9 @@ final class DeltaThread implements Runnable {
 
             // check whether we use cg this time
             if (this.trainConfig.isUseCG() && (this.curr_epoch <= this.trainConfig.getCgEpochStep())) {
-                this.lr.gradientUpdateCG(this.trainConfig, x_samples, y_samples, this.my_w, this.my_b);
-            } else if (this.trainConfig.isUseMiniBatch()) {
-
+                this.lr.gradientUpdateCG(trainConfig, x_samples, y_samples, my_w, my_b);
             } else {
-
+                this.lr.gradientUpdateMiniBatch(trainConfig, x_samples, y_samples, my_w, my_b);
             }
         } catch (Throwable e) {
             logger.error("", e);

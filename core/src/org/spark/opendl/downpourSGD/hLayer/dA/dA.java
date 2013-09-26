@@ -121,4 +121,10 @@ public class dA extends HiddenLayer {
             }
         }
     }
+
+	@Override
+	protected void reconstruct(double[] x, double[] reconstruct_x) {
+		// TODO Auto-generated method stub
+		
+	}
 }

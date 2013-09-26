@@ -2,15 +2,32 @@ package org.spark.opendl.downpourSGD;
 
 import java.io.Serializable;
 
+/**
+ * Sample can contains supervised data or unsupervised data<p/>
+ * 
+ * @author GuoDing
+ * @since 2013-07-23
+ */
 public class SampleVector implements Serializable {
     private static final long serialVersionUID = 1L;
-    protected double[] x;
-    protected double[] y;
+    private double[] x;
+    private double[] y;
 
+    /**
+     * Constructor with unsupervised data
+     * 
+     * @param x_feature Feature number
+     */
     public SampleVector(int x_feature) {
         this(x_feature, 0);
     }
 
+    /**
+     * Constructor with supervised data
+     * 
+     * @param x_feature Feature number
+     * @param y_feature Class number
+     */
     public SampleVector(int x_feature, int y_feature) {
         x = new double[x_feature];
         y = new double[y_feature];
