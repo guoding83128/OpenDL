@@ -27,6 +27,14 @@ import cc.mallet.optimize.LineOptimizer;
 import cc.mallet.optimize.Optimizable;
 import cc.mallet.types.MatrixOps;
 
+/**
+ * Modify based on cc.mallet.optimize.BackTrackLineSearch <p/>
+ * temporary double array(g,x,oldParameters) only created during constructor
+ * 
+ * @author GuoDing
+ * @since 2013-09-02
+ */
+
 //"Line Searches and Backtracking", p385, "Numeric Recipes in C"
 
 class BackTrackLineSearch implements LineOptimizer.ByGradient{

@@ -7,21 +7,48 @@ import org.jblas.DoubleMatrix;
 import org.jblas.MatrixFunctions;
 import org.spark.opendl.downpourSGD.SampleVector;
 
+/**
+ * Some mathematic utility function <p/>
+ * 
+ * @author GuoDing
+ * @since 2013-07-01
+ */
 public final class MathUtil {
     private static Random rand = new Random(System.currentTimeMillis());
 
+    /**
+     * Sigmod function
+     * @param z
+     * @return
+     */
     public static double sigmod(double z) {
         return 1.0 / (1.0 + Math.exp(-z));
     }
 
+    /**
+     * Uniform with random in some range
+     * @param min
+     * @param max
+     * @return
+     */
     public static double uniform(double min, double max) {
         return rand.nextDouble() * (max - min) + min;
     }
 
+    /**
+     * Sigmod for each node in matrix
+     * @param m
+     */
     public static void sigmod(DoubleMatrix m) {
         MatrixFunctions.expi(m.negi()).addi(1.0).rdivi(1.0);
     }
 
+    /**
+     * Corruption process for dA
+     * @param n
+     * @param p
+     * @return
+     */
     public static int binomial(int n, double p) {
         if ((p < 0) || (p > 1)) {
             return 0;
@@ -35,42 +62,11 @@ public final class MathUtil {
         return c;
     }
 
-    public static double vectorL2Diff(double[] v1, double[] v2, int feature) {
-        double ret = 0;
-        for (int i = 0; i < feature; i++) {
-            double a1 = v1[i];
-            double a2 = v2[i];
-            ret += (a1 - a2) * (a1 - a2);
-        }
-        return Math.sqrt(ret);
-    }
-
-    public static void doubleArrayCopy(double[][] src, double[][] dest, int row, int col) {
-        for (int i = 0; i < row; i++) {
-            for (int j = 0; j < col; j++) {
-                dest[i][j] = src[i][j];
-            }
-        }
-    }
-
-    public static void doubleArrayCopy(double[] src, double[] dest, int size) {
-        for (int i = 0; i < size; i++) {
-            dest[i] = src[i];
-        }
-    }
-
-    public static boolean comparePredict(double[] y, double[] predict_y) {
-        double max = 0;
-        int idx = -1;
-        for (int i = 0; i < predict_y.length; i++) {
-            if (predict_y[i] > max) {
-                max = predict_y[i];
-                idx = i;
-            }
-        }
-        return (1 == y[idx]);
-    }
-
+    /**
+     * Convert sample X to matrix
+     * @param samples
+     * @return
+     */
     public static DoubleMatrix convertX2Matrix(List<SampleVector> samples) {
         int row = samples.size();
         int col = samples.get(0).getX().length;
@@ -87,6 +83,11 @@ public final class MathUtil {
         return ret;
     }
 
+    /**
+     * Convert class Y to matrix
+     * @param samples
+     * @return
+     */
     public static DoubleMatrix convertY2Matrix(List<SampleVector> samples) {
         int row = samples.size();
         int col = samples.get(0).getY().length;
@@ -101,9 +102,5 @@ public final class MathUtil {
             row++;
         }
         return ret;
-    }
-
-    public static void main(String[] args) {
-
     }
 }

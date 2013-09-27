@@ -13,6 +13,7 @@ import org.spark.opendl.util.MathUtil;
 
 /**
  * Hidden layer node framework <p/>
+ * Notice, for dA and RBM, we use tied weights, so only one weight matrix need <p/>
  * 
  * @author GuoDing
  * @since 2013-07-15
@@ -176,6 +177,14 @@ public abstract class HiddenLayer implements SGDPersistable, Serializable {
         wr.write(newLine);
     }
 
+    /**
+     * Merge param update with one model replica<p/>
+     * Notice: use average merge w = w + (deltaw1 + deltaw2 + ... + deltawm)/m <p/>
+     * @param new_w New updated weight matrix
+     * @param new_hbias New updated hidden layer bias vector
+     * @param new_vbias New updated visible layer bias vector
+     * @param nbr_model Number of model replica
+     */
     protected final void mergeParam(DoubleMatrix new_w, DoubleMatrix new_hbias, DoubleMatrix new_vbias, int nbr_model) {
         w.addi(new_w.sub(w).divi(nbr_model));
         hbias.addi(new_hbias.sub(hbias).divi(nbr_model));
@@ -184,7 +193,6 @@ public abstract class HiddenLayer implements SGDPersistable, Serializable {
 
     /**
      * Gradient descent with mini-batch
-     * 
      * @param config Train config
      * @param samples Input samples
      * @param curr_w W matrix of current epoch
@@ -196,7 +204,6 @@ public abstract class HiddenLayer implements SGDPersistable, Serializable {
 
     /**
      * Conjugate gradient batch update
-     * 
      * @param config Train config
      * @param samples Input samples
      * @param curr_w W matrix of current epoch
@@ -209,7 +216,6 @@ public abstract class HiddenLayer implements SGDPersistable, Serializable {
     /**
      * Reconstruct process: from input layer to hidden layer<p/>
      * then convert back to visible layer with transpose W
-     * 
      * @param input
      * @return
      */
@@ -218,7 +224,6 @@ public abstract class HiddenLayer implements SGDPersistable, Serializable {
     /**
      * Reconstruct process: from input layer to hidden layer<p/>
      * then convert back to visible layer with transpose W
-     * 
      * @param x
      * @param reconstruct_x
      */

@@ -204,7 +204,6 @@ public final class LR implements SGDPersistable, Serializable {
 
     /**
      * Merge param update with one model replica
-     * 
      * @param new_w W param matrix update
      * @param new_b B param vector update
      * @param nbr_model Number of model replica

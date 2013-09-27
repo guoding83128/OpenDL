@@ -20,11 +20,9 @@ final class LossSpark extends Function<Tuple2<Integer, List<SampleVector>>, Doub
 
     @Override
     public Double call(Tuple2<Integer, List<SampleVector>> arg) throws Exception {
-        double error = 0;
         DoubleMatrix x_samples = MathUtil.convertX2Matrix(arg._2());
         DoubleMatrix y_samples = MathUtil.convertY2Matrix(arg._2());
         DoubleMatrix predict_y = this.lr.predict(x_samples);
-        error = MatrixFunctions.powi(predict_y.sub(y_samples), 2).sum();
-        return error;
+        return MatrixFunctions.powi(predict_y.sub(y_samples), 2).sum();
     }
 }

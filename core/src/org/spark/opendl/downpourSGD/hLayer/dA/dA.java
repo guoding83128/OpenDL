@@ -9,6 +9,13 @@ import org.spark.opendl.downpourSGD.hLayer.HiddenLayerOptimizer;
 import org.spark.opendl.util.MathUtil;
 import org.spark.opendl.util.MyConjugateGradient;
 
+/**
+ * Denoising Autoencoders implementation <p/>
+ * refer to http://deeplearning.net/tutorial/dA.html
+ * 
+ * @author GuoDing
+ * @since 2013-08-15
+ */
 public class dA extends HiddenLayer {
     private static final Logger logger = Logger.getLogger(dA.class);
     private static final long serialVersionUID = 1L;
@@ -28,7 +35,9 @@ public class dA extends HiddenLayer {
 
     @Override
     protected void gradientUpdateMiniBatch(SGDTrainConfig config, DoubleMatrix samples, DoubleMatrix curr_w,
-            DoubleMatrix curr_hbias, DoubleMatrix curr_vbias) {}
+            DoubleMatrix curr_hbias, DoubleMatrix curr_vbias) {
+    	
+    }
 
     @Override
     protected void gradientUpdateCG(SGDTrainConfig config, DoubleMatrix samples, DoubleMatrix curr_w,
@@ -51,6 +60,10 @@ public class dA extends HiddenLayer {
         MathUtil.sigmod(ret);
         return ret;
     }
+    
+    @Override
+	protected void reconstruct(double[] x, double[] reconstruct_x) {
+	}
 
     private DoubleMatrix get_corrupted_input(DoubleMatrix x, double p) {
         DoubleMatrix ret = new DoubleMatrix(x.getRows(), x.getColumns());
@@ -121,10 +134,4 @@ public class dA extends HiddenLayer {
             }
         }
     }
-
-	@Override
-	protected void reconstruct(double[] x, double[] reconstruct_x) {
-		// TODO Auto-generated method stub
-		
-	}
 }

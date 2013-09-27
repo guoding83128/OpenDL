@@ -1,9 +1,3 @@
-/**
- * @(#)HiddenLayerOptimizer.java, 2013-8-28. 
- * 
- * Copyright 2013 NetEase, Inc. All rights reserved.
- * NetEase PROPRIETARY/CONFIDENTIAL. Use is subject to license terms.
- */
 package org.spark.opendl.downpourSGD.hLayer;
 
 import org.jblas.DoubleMatrix;
@@ -11,6 +5,12 @@ import org.spark.opendl.downpourSGD.SGDTrainConfig;
 
 import cc.mallet.optimize.Optimizable;
 
+/**
+ * ConjugateGradient optimizer implementation for hidden layer(dA, RBM) <p/>
+ * 
+ * @author GuoDing
+ * @since 2013-08-15
+ */
 public abstract class HiddenLayerOptimizer implements Optimizable.ByGradientValue {
     protected SGDTrainConfig myConfig;
     protected int my_n_visible;

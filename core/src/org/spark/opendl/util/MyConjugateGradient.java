@@ -21,6 +21,14 @@ import cc.mallet.optimize.OptimizerEvaluator;
 import cc.mallet.types.MatrixOps;
 import cc.mallet.util.MalletLogger;
 
+/**
+ * Modified based on cc.mallet.optimize.ConjugateGradient <p/>
+ * no termination when zero tolerance 
+ * 
+ * @author GuoDing
+ * @since 2013-08-25
+ */
+
 // Conjugate Gradient, Polak and Ribiere version
 // from "Numeric Recipes in C", Section 10.6.
 

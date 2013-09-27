@@ -12,7 +12,24 @@ import java.io.Writer;
  * @since 2013-07-23
  */
 public interface SGDPersistable {
+	/**
+	 * Read in from data inputstream
+	 * @param in
+	 * @throws IOException
+	 */
     public void read(DataInput in) throws IOException;
+    
+    /**
+     * Write out to persistence
+     * @param out
+     * @throws IOException
+     */
     public void write(DataOutput out) throws IOException;
+    
+    /**
+     * Print out just for log, debug
+     * @param wr
+     * @throws IOException
+     */
     public void print(Writer wr) throws IOException;
 }
