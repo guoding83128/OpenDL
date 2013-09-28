@@ -58,7 +58,25 @@ public class RBM extends HiddenLayer {
     @Override
     protected void gradientUpdateMiniBatch(SGDTrainConfig config, DoubleMatrix samples, DoubleMatrix curr_w,
             DoubleMatrix curr_hbias, DoubleMatrix curr_vbias) {
+    	int nbr_sample = samples.getRows();
+    	DoubleMatrix ph_mean = new DoubleMatrix(nbr_sample, n_hidden);
+    	DoubleMatrix ph_sample = new DoubleMatrix(nbr_sample, n_hidden);
+    	DoubleMatrix nv_means = new DoubleMatrix(nbr_sample, n_visible);
+    	DoubleMatrix nv_samples = new DoubleMatrix(nbr_sample, n_visible);
+    	DoubleMatrix nh_means = new DoubleMatrix(nbr_sample, n_hidden);
+    	DoubleMatrix nh_samples = new DoubleMatrix(nbr_sample, n_hidden);
     	
+    	sample_h_given_v(samples, ph_mean, ph_sample, curr_w, curr_hbias);
+        sample_v_given_h(ph_sample, nv_means, nv_samples, curr_w, curr_vbias);
+        sample_h_given_v(nv_samples, nh_means, nh_samples, curr_w, curr_hbias);
+        
+        DoubleMatrix delta_w = ph_mean.transpose().mmul(samples).subi(nh_means.transpose().mmul(nv_samples)).divi(nbr_sample);
+        DoubleMatrix delta_hbias = ph_sample.sub(nh_means).columnSums().divi(nbr_sample);
+        DoubleMatrix delta_vbias = samples.sub(nv_samples).columnSums().divi(nbr_sample);
+        
+        curr_w.addi(delta_w.muli(config.getLearningRate()));
+        curr_hbias.addi(delta_hbias.transpose().muli(config.getLearningRate()));
+        curr_vbias.addi(delta_vbias.transpose().muli(config.getLearningRate()));
     }
 
     @Override
@@ -85,6 +103,11 @@ public class RBM extends HiddenLayer {
     
 	@Override
 	protected void reconstruct(double[] x, double[] reconstruct_x) {
+		DoubleMatrix x_m = new DoubleMatrix(x).transpose();
+    	DoubleMatrix ret = reconstruct(x_m);
+    	for(int i = 0; i < n_visible; i++) {
+    		reconstruct_x[i] = ret.get(0, i);
+    	}
 	}
 
     private class RBMOptimizer extends HiddenLayerOptimizer {
@@ -117,8 +140,7 @@ public class RBM extends HiddenLayer {
         @Override
         public void getValueGradient(double[] arg) {
             sample_h_given_v(nv_samples, nh_means, nh_samples, my_w, my_hbias);
-            DoubleMatrix delta_w = ph_mean.transpose().mmul(my_samples).subi(nh_means.transpose().mmul(nv_samples))
-                    .divi(nbr_sample);
+            DoubleMatrix delta_w = ph_mean.transpose().mmul(my_samples).subi(nh_means.transpose().mmul(nv_samples)).divi(nbr_sample);
             DoubleMatrix delta_hbias = ph_sample.sub(nh_means).columnSums().divi(nbr_sample);
             DoubleMatrix delta_vbias = my_samples.sub(nv_samples).columnSums().divi(nbr_sample);
 

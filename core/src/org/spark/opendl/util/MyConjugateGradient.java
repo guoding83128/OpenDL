@@ -13,7 +13,7 @@ package org.spark.opendl.util;
 
 import java.util.logging.*;
 
-//import cc.mallet.optimize.BackTrackLineSearch;
+import cc.mallet.optimize.BackTrackLineSearch;
 import cc.mallet.optimize.LineOptimizer;
 import cc.mallet.optimize.Optimizable;
 import cc.mallet.optimize.Optimizer;

@@ -168,16 +168,16 @@ public final class LR implements SGDPersistable, Serializable {
         if (config.isUseRegularization()) {
             if (0 != config.getLamada1()) {
                 delta_w.addi(MatrixFunctions.signum(curr_w).mmuli(config.getLamada1()));
-                delta_b.addi(MatrixFunctions.signum(curr_b).mmuli(config.getLamada1()));
+                delta_b.addi(MatrixFunctions.signum(curr_b).transpose().mmuli(config.getLamada1()));
             }
             if (0 != config.getLamada2()) {
                 delta_w.addi(curr_w.mmul(config.getLamada2()));
-                delta_b.addi(curr_b.mmul(config.getLamada2()));
+                delta_b.addi(curr_b.transpose().mmul(config.getLamada2()));
             }
         }
         
         curr_w.addi(delta_w.muli(config.getLearningRate()));
-        curr_b.addi(delta_b.muli(config.getLearningRate()));
+        curr_b.addi(delta_b.transpose().muli(config.getLearningRate()));
     }
 
     /**
@@ -199,7 +199,6 @@ public final class LR implements SGDPersistable, Serializable {
         } catch (Throwable e) {
             logger.error("", e);
         } 
-        logger.info(Thread.currentThread().getName() + " cg finish");
     }
 
     /**
@@ -361,11 +360,11 @@ public final class LR implements SGDPersistable, Serializable {
             if (my_config.isUseRegularization()) {
                 if (0 != my_config.getLamada1()) {
                     delta_w.addi(MatrixFunctions.signum(my_w).mmuli(my_config.getLamada1()));
-                    delta_b.addi(MatrixFunctions.signum(my_b).mmuli(my_config.getLamada1()));
+                    delta_b.addi(MatrixFunctions.signum(my_b).transpose().mmuli(my_config.getLamada1()));
                 }
                 if (0 != my_config.getLamada2()) {
                     delta_w.addi(my_w.mmul(my_config.getLamada2()));
-                    delta_b.addi(my_b.mmul(my_config.getLamada2()));
+                    delta_b.addi(my_b.transpose().mmul(my_config.getLamada2()));
                 }
             }
 
@@ -376,7 +375,7 @@ public final class LR implements SGDPersistable, Serializable {
                 }
             }
             for (int i = 0; i < y_num; i++) {
-                arg[idx++] = delta_b.get(i, 0);
+                arg[idx++] = delta_b.get(0, i);
             }
         }
     }

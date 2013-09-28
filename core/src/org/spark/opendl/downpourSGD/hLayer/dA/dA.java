@@ -36,7 +36,45 @@ public class dA extends HiddenLayer {
     @Override
     protected void gradientUpdateMiniBatch(SGDTrainConfig config, DoubleMatrix samples, DoubleMatrix curr_w,
             DoubleMatrix curr_hbias, DoubleMatrix curr_vbias) {
-    	
+    	int nbr_sample = samples.rows;
+        
+        /**
+         * reconstruct
+         */
+    	DoubleMatrix tilde_x = null;
+        DoubleMatrix y = null;
+        DoubleMatrix z = null;
+    	if (config.isDoCorruption()) {
+            double p = 1 - config.getCorruption_level();
+            tilde_x = get_corrupted_input(samples, p);
+            y = tilde_x.mmul(curr_w.transpose()).addiRowVector(curr_hbias);
+        }
+    	else {
+    		y = samples.mmul(curr_w.transpose()).addiRowVector(curr_hbias);
+    	}
+    	MathUtil.sigmod(y);
+        z = y.mmul(curr_w).addiRowVector(curr_vbias);
+        MathUtil.sigmod(z);
+        
+        /**
+         * gradient update
+         */
+        DoubleMatrix L_vbias = samples.sub(z);
+        DoubleMatrix L_hbias = L_vbias.mmul(curr_w.transpose()).muli(y).muli(y.neg().addi(1));
+        DoubleMatrix delta_w = null;
+        if (config.isDoCorruption()) {
+            delta_w = L_hbias.transpose().mmul(tilde_x).addi(y.transpose().mmul(L_vbias));
+        } else {
+            delta_w = L_hbias.transpose().mmul(samples).addi(y.transpose().mmul(L_vbias));
+        }
+        
+        delta_w.divi(nbr_sample);
+        DoubleMatrix delta_hbias = L_hbias.columnSums().divi(nbr_sample);
+        DoubleMatrix delta_vbias = L_vbias.columnSums().divi(nbr_sample);
+        
+        curr_w.addi(delta_w.muli(config.getLearningRate()));
+        curr_hbias.addi(delta_hbias.transpose().muli(config.getLearningRate()));
+        curr_vbias.addi(delta_vbias.transpose().muli(config.getLearningRate()));
     }
 
     @Override
@@ -63,6 +101,11 @@ public class dA extends HiddenLayer {
     
     @Override
 	protected void reconstruct(double[] x, double[] reconstruct_x) {
+    	DoubleMatrix x_m = new DoubleMatrix(x).transpose();
+    	DoubleMatrix ret = reconstruct(x_m);
+    	for(int i = 0; i < n_visible; i++) {
+    		reconstruct_x[i] = ret.get(0, i);
+    	}
 	}
 
     private DoubleMatrix get_corrupted_input(DoubleMatrix x, double p) {
