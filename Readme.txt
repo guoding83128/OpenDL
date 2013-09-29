@@ -43,3 +43,7 @@ The last is JBlas, library of Linear Algebra for Java, refer to http://mikiobrau
     broad will be created soon! 
 
 # Any suggestion are welcome. 
+
+# References
+[1] Large Scale Distributed Deep Networks. Jeffrey Dean, Google Inc.
+[2] Building High-level Features Using Large Scale Unsupervised Learning. Quoc V. Le,Marc'Aurelio Ranzato, Stanford & Google Inc.
