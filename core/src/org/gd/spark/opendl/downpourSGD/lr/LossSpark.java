@@ -3,8 +3,8 @@ package org.gd.spark.opendl.downpourSGD.lr;
 import java.util.List;
 
 import scala.Tuple2;
-import spark.api.java.function.Function;
 
+import org.apache.spark.api.java.function.Function;
 import org.gd.spark.opendl.downpourSGD.SampleVector;
 import org.gd.spark.opendl.util.MathUtil;
 import org.jblas.DoubleMatrix;

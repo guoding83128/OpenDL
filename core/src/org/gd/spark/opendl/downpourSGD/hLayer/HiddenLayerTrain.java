@@ -7,12 +7,12 @@ import java.util.List;
 import java.util.Random;
 
 import org.apache.log4j.Logger;
+import org.apache.spark.api.java.JavaPairRDD;
+import org.apache.spark.api.java.JavaRDD;
 import org.gd.spark.opendl.downpourSGD.ModelReplicaSplit;
 import org.gd.spark.opendl.downpourSGD.SGDTrainConfig;
 import org.gd.spark.opendl.downpourSGD.SampleVector;
 
-import spark.api.java.JavaPairRDD;
-import spark.api.java.JavaRDD;
 
 /**
  * Hidden layer train work api <p/>

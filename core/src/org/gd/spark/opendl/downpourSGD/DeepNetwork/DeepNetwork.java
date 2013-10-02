@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.log4j.Logger;
+import org.apache.spark.api.java.JavaRDD;
 import org.gd.spark.opendl.downpourSGD.SGDPersistable;
 import org.gd.spark.opendl.downpourSGD.SGDTrainConfig;
 import org.gd.spark.opendl.downpourSGD.SampleVector;
@@ -17,8 +18,6 @@ import org.gd.spark.opendl.downpourSGD.hLayer.HiddenLayerTrain;
 import org.gd.spark.opendl.downpourSGD.lr.LR;
 import org.gd.spark.opendl.downpourSGD.lr.LRTrain;
 import org.jblas.DoubleMatrix;
-
-import spark.api.java.JavaRDD;
 
 
 /**

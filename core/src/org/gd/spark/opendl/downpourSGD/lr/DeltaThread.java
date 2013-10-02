@@ -3,14 +3,12 @@ package org.gd.spark.opendl.downpourSGD.lr;
 import java.util.Collections;
 import java.util.List;
 
-import org.apache.log4j.Logger;
 import org.gd.spark.opendl.downpourSGD.SGDTrainConfig;
 import org.gd.spark.opendl.downpourSGD.SampleVector;
 import org.gd.spark.opendl.util.MathUtil;
 import org.jblas.DoubleMatrix;
 
 final class DeltaThread implements Runnable {
-    private static final Logger logger = Logger.getLogger(DeltaThread.class);
     private LR lr;
     private SGDTrainConfig trainConfig;
     private DoubleMatrix my_w;
@@ -54,22 +52,19 @@ final class DeltaThread implements Runnable {
     }
 
     @Override
-    public void run() {
-        this.running = true;
-        try {
-            // always get latest param
-            this.my_w = lr.getW().dup();
-            this.my_b = lr.getB().dup();
+	public void run() {
+		this.running = true;
+		// always get latest param
+		this.my_w = lr.getW().dup();
+		this.my_b = lr.getB().dup();
 
-            // check whether we use cg this time
-            if (this.trainConfig.isUseCG() && (this.curr_epoch <= this.trainConfig.getCgEpochStep())) {
-                this.lr.gradientUpdateCG(trainConfig, x_samples, y_samples, my_w, my_b);
-            } else {
-                this.lr.gradientUpdateMiniBatch(trainConfig, x_samples, y_samples, my_w, my_b);
-            }
-        } catch (Throwable e) {
-            logger.error("", e);
-        }
-        this.running = false;
-    }
+		// check whether we use cg this time
+		if (this.trainConfig.isUseCG() && (this.curr_epoch <= this.trainConfig.getCgEpochStep())) {
+			this.lr.gradientUpdateCG(trainConfig, x_samples, y_samples, my_w, my_b);
+		} else {
+			this.lr.gradientUpdateMiniBatch(trainConfig, x_samples, y_samples, my_w, my_b);
+		}
+
+		this.running = false;
+	}
 }

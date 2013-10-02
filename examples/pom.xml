@@ -5,36 +5,17 @@
 	<artifactId>opendl-example</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 
-	<dependencies>
+	<dependencies>  
         <dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-log4j12</artifactId>
 			<version>1.6.1</version>
 		</dependency>
-		<!--
 		<dependency>  
-            <groupId>org.projectlombok</groupId>  
-            <artifactId>lombok</artifactId>  
-            <version>0.11.0</version>  
-        </dependency>-->
-        <!--  
-        <dependency>  
-            <groupId>org.spark-project</groupId>  
+            <groupId>org.apache.spark</groupId>  
             <artifactId>spark-core_2.9.3</artifactId>  
-            <version>0.7.3</version>
-        </dependency>-->
-        <!--
-        <dependency>
-	        <groupId>cc.mallet</groupId>
-	        <artifactId>mallet</artifactId>
-	        <version>2.0.7-RC2</version>
+            <version>0.8.0-incubating</version>
         </dependency>
-        <dependency>
-            <groupId>org.jblas</groupId>
-            <artifactId>jblas</artifactId>
-            <version>1.2.3</version>
-        </dependency>-->
-        
 	</dependencies>
 
 	<properties>
@@ -54,6 +35,25 @@
 					<target>1.6</target>
 				</configuration>
 			</plugin>
+			<!--  
+			<plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>copy</id>
+                        <phase>install</phase>
+                        <goals>
+                            <goal>copy-dependencies</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>
+                              ${project.build.directory}/lib
+                            </outputDirectory>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin> -->
 		</plugins>
 	</build>
 

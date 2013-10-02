@@ -4,10 +4,11 @@ import java.io.Serializable;
 import java.util.List;
 import java.util.Random;
 
+import org.apache.spark.api.java.JavaPairRDD;
+import org.apache.spark.api.java.JavaRDD;
+import org.apache.spark.api.java.function.PairFunction;
+
 import scala.Tuple2;
-import spark.api.java.JavaPairRDD;
-import spark.api.java.JavaRDD;
-import spark.api.java.function.PairFunction;
 
 /**
  * Samples split for Spark train work <p/>

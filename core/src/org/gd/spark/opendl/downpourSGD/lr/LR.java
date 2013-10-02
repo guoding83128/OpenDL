@@ -15,6 +15,7 @@ import org.jblas.MatrixFunctions;
 
 import cc.mallet.optimize.Optimizable;
 
+
 /**
  * Logistic Regression(Softmax) node <p/>
  * 

@@ -2,7 +2,7 @@ package org.gd.spark.opendl.downpourSGD;
 
 import java.io.Serializable;
 
-import spark.storage.StorageLevel;
+import org.apache.spark.storage.StorageLevel;
 
 import lombok.Data;
 

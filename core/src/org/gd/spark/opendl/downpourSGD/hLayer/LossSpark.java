@@ -2,13 +2,13 @@ package org.gd.spark.opendl.downpourSGD.hLayer;
 
 import java.util.List;
 
+import org.apache.spark.api.java.function.Function;
 import org.gd.spark.opendl.downpourSGD.SampleVector;
 import org.gd.spark.opendl.util.MathUtil;
 import org.jblas.DoubleMatrix;
 import org.jblas.MatrixFunctions;
 
 import scala.Tuple2;
-import spark.api.java.function.Function;
 
 final class LossSpark extends Function<Tuple2<Integer, List<SampleVector>>, Double> {
     private static final long serialVersionUID = 1L;
