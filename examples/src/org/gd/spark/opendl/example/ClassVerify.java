@@ -24,6 +24,14 @@ public class ClassVerify {
     	return (y_idx == predict_y_idx);
     }
     
+    public static double squaredError(double[] x, double[] reconstruct_x) {
+    	double ret = 0;
+    	for(int i = 0; i < x.length; i++) {
+    		ret += (x[i] - reconstruct_x[i]) * (x[i] - reconstruct_x[i]);
+    	}
+    	return ret;
+    }
+    
     public static String printDoubleArray(double[] d) {
     	StringBuffer sb = new StringBuffer();
     	for(int i = 0; i < d.length; i++) {

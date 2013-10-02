@@ -93,7 +93,7 @@ public class RBM extends HiddenLayer {
     }
 
     @Override
-    protected DoubleMatrix reconstruct(DoubleMatrix input) {
+    public DoubleMatrix reconstruct(DoubleMatrix input) {
         DoubleMatrix ret = input.mmul(w.transpose()).addiRowVector(hbias);
         MathUtil.sigmod(ret);
         ret = ret.mmul(w).addiRowVector(vbias);
@@ -102,7 +102,7 @@ public class RBM extends HiddenLayer {
     }
     
 	@Override
-	protected void reconstruct(double[] x, double[] reconstruct_x) {
+	public void reconstruct(double[] x, double[] reconstruct_x) {
 		DoubleMatrix x_m = new DoubleMatrix(x).transpose();
     	DoubleMatrix ret = reconstruct(x_m);
     	for(int i = 0; i < n_visible; i++) {

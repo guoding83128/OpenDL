@@ -219,7 +219,7 @@ public abstract class HiddenLayer implements SGDPersistable, Serializable {
      * @param input
      * @return
      */
-    protected abstract DoubleMatrix reconstruct(DoubleMatrix input);
+    public abstract DoubleMatrix reconstruct(DoubleMatrix input);
     
     /**
      * Reconstruct process: from input layer to hidden layer<p/>
@@ -227,5 +227,5 @@ public abstract class HiddenLayer implements SGDPersistable, Serializable {
      * @param x
      * @param reconstruct_x
      */
-    protected abstract void reconstruct(double[] x, double[] reconstruct_x);
+    public abstract void reconstruct(double[] x, double[] reconstruct_x);
 }
