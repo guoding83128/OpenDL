@@ -143,11 +143,11 @@ public final class LRTrain implements Serializable {
 
         // iteration
         for (int epoch = 1; epoch <= config.getMaxEpochs(); epoch++) {
+        	logger.info("start train for this iteration-" + epoch);
             JavaRDD<DeltaSpark> deltas = modedSplit.map(new DeltaSpark(lr, config, epoch));
             for (DeltaSpark delta: deltas.collect()) {
                 lr.mergeParam(delta.getW(), delta.getB(), nrModelReplica);
             }
-
             logger.info("train done for this iteration-" + epoch);
 
             if (0 != (epoch % config.getLossCalStep())) {
