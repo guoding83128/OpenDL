@@ -6,8 +6,11 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.io.Writer;
 
+import org.apache.spark.api.java.JavaRDD;
+import org.apache.spark.api.java.function.Function;
 import org.gd.spark.opendl.downpourSGD.SGDPersistable;
 import org.gd.spark.opendl.downpourSGD.SGDTrainConfig;
+import org.gd.spark.opendl.downpourSGD.SampleVector;
 import org.gd.spark.opendl.util.MathUtil;
 import org.jblas.DoubleMatrix;
 
@@ -69,8 +72,7 @@ public abstract class HiddenLayer implements SGDPersistable, Serializable {
     }
 
     /**
-     * Input layer to hidden layer Sigmod output
-     * 
+     * Input layer to hidden layer Sigmod output(standalone)
      * @param input Input layer matrix
      * @return Hidden layer output matrix
      */
@@ -82,7 +84,6 @@ public abstract class HiddenLayer implements SGDPersistable, Serializable {
     
     /**
      * Input layer to hidden layer Sigmod output
-     * 
      * @param visible_x Input layer data
      * @param hidden_x Hidden layer output data
      */
@@ -95,6 +96,16 @@ public abstract class HiddenLayer implements SGDPersistable, Serializable {
             hidden_x[i] += hbias.get(i, 0);
             hidden_x[i] = MathUtil.sigmod(hidden_x[i]);
         }
+    }
+    
+    /**
+     * Input layer to hidden layer Sigmod output on Spark
+     * @param samples Input layer data RDD
+     * @param copyY Whether copy the y data from original input to output
+     * @return Output sigmod data RDD
+     */
+    public final JavaRDD<SampleVector> sigmod_output(JavaRDD<SampleVector> samples, boolean copyY) {
+    	return samples.map(new SigmodOutputSpark(copyY));
     }
 
     public DoubleMatrix getW() {
@@ -228,4 +239,30 @@ public abstract class HiddenLayer implements SGDPersistable, Serializable {
      * @param reconstruct_x
      */
     public abstract void reconstruct(double[] x, double[] reconstruct_x);
+    
+    
+    
+    
+    private class SigmodOutputSpark extends Function<SampleVector, SampleVector> {
+		private static final long serialVersionUID = 1L;
+		private boolean copyY = false;
+		public SigmodOutputSpark(boolean _copyY) {
+			copyY = _copyY;
+		}
+		@Override
+		public SampleVector call(SampleVector arg) throws Exception {
+			SampleVector ret = null;
+			if(copyY) {
+				ret = new SampleVector(n_hidden, arg.getY().length);
+				for(int i = 0; i < arg.getY().length; i++) {
+					ret.getY()[i] = arg.getY()[i];
+				}
+			}
+			else {
+				ret = new SampleVector(n_hidden);
+			}
+			sigmod_output(arg.getX(), ret.getX());
+			return ret;
+		}
+    }
 }

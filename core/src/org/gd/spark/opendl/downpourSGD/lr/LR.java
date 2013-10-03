@@ -7,8 +7,11 @@ import java.io.Serializable;
 import java.io.Writer;
 
 import org.apache.log4j.Logger;
+import org.apache.spark.api.java.JavaRDD;
+import org.apache.spark.api.java.function.Function;
 import org.gd.spark.opendl.downpourSGD.SGDPersistable;
 import org.gd.spark.opendl.downpourSGD.SGDTrainConfig;
+import org.gd.spark.opendl.downpourSGD.SampleVector;
 import org.gd.spark.opendl.util.MyConjugateGradient;
 import org.jblas.DoubleMatrix;
 import org.jblas.MatrixFunctions;
@@ -64,8 +67,7 @@ public final class LR implements SGDPersistable, Serializable {
     }
 
     /**
-     * Do predict work with multiple sample
-     * 
+     * Do predict work with multiple sample(standalone)
      * @param x Input samples matrix
      * @return Predict result matrix (row=x's row, column=class num)
      */
@@ -77,7 +79,6 @@ public final class LR implements SGDPersistable, Serializable {
 
     /**
      * Do predict work with one sample
-     * 
      * @param x Input sample
      * @param y Output predict result
      */
@@ -90,6 +91,16 @@ public final class LR implements SGDPersistable, Serializable {
             y[i] += b.get(i, 0);
         }
         softmax(y);
+    }
+    
+    /**
+     * Do predict work on spark
+     * @param samples Input data RDD
+     * @copyX Whether copy x data from original input to output SampleVector
+     * @return Predict result data RDD
+     */
+    public final JavaRDD<SampleVector> predict(JavaRDD<SampleVector> samples, boolean copyX) {
+    	return samples.map(new PredictSpark(copyX));
     }
 
     private void softmax(DoubleMatrix y) {
@@ -379,5 +390,24 @@ public final class LR implements SGDPersistable, Serializable {
                 arg[idx++] = delta_b.get(0, i);
             }
         }
+    }
+    
+    private class PredictSpark extends Function<SampleVector, SampleVector> {
+		private static final long serialVersionUID = 1L;
+		private boolean copyX = false;
+		public PredictSpark(boolean _copyX) {
+			copyX = _copyX;
+		}
+		@Override
+		public SampleVector call(SampleVector arg) throws Exception {
+			SampleVector ret = new SampleVector(x_num, y_num);
+			if(copyX) {
+				for(int i = 0; i < x_num; i++) {
+					ret.getX()[i] = arg.getX()[i];
+				}
+			}
+			predict(arg.getX(), ret.getY());
+			return ret;
+		}
     }
 }

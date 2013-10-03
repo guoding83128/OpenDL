@@ -57,11 +57,6 @@ public class SGDTrainConfig implements Serializable {
     public double corruption_level = 0.3;
 
     /**
-     * fro RBM
-     */
-    private int kStep = 1; // CD-k
-
-    /**
      * use ConjugateGradient on front step
      */
     // whether use cg on front step
