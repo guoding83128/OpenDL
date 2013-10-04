@@ -34,6 +34,7 @@ public class LRTest {
             config.setNbrModelReplica(4);
             config.setMinLoss(0.01);
             config.setUseRegularization(true);
+            config.setPrintLoss(true);
             
             logger.info("Start to train lr.");
             LRTrain.train(lr, trainList, config);

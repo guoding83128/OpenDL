@@ -6,6 +6,7 @@ import java.util.List;
 import org.apache.log4j.Logger;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
+import org.apache.spark.storage.StorageLevel;
 import org.gd.spark.opendl.downpourSGD.SGDTrainConfig;
 import org.gd.spark.opendl.downpourSGD.SampleVector;
 import org.gd.spark.opendl.downpourSGD.lr.LR;
@@ -41,6 +42,12 @@ public class LRTest {
             config.setNbrModelReplica(4);
             config.setMinLoss(0.01);
             config.setUseRegularization(true);
+            config.setMrDataStorage(StorageLevel.MEMORY_ONLY());
+            config.setPrintLoss(true);
+            config.setLossCalStep(3);
+            config.setParamOutput(true);
+            config.setParamOutputStep(3);
+            config.setParamOutputPath("wb.bin");
             
             logger.info("Start to train lr.");
             LRTrain.train(lr, rdds, config);

@@ -10,6 +10,7 @@ import org.apache.log4j.Logger;
 import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.JavaRDD;
 import org.gd.spark.opendl.downpourSGD.ModelReplicaSplit;
+import org.gd.spark.opendl.downpourSGD.SGDPersistableWrite;
 import org.gd.spark.opendl.downpourSGD.SGDTrainConfig;
 import org.gd.spark.opendl.downpourSGD.SampleVector;
 
@@ -81,6 +82,19 @@ public final class HiddenLayerTrain implements Serializable {
 
             logger.info("update done for this iteration-" + epoch);
 
+            /**
+             * 1 parameter output
+             */
+            if(config.isParamOutput() && (0 == (epoch % config.getParamOutputStep()))) {
+            	SGDPersistableWrite.output(config.getParamOutputPath(), hLayer);
+            }
+            
+            /**
+             * 2 loss print
+             */
+            if(!config.isPrintLoss()) {
+            	continue;
+            }
             if (0 != (epoch % config.getLossCalStep())) {
                 continue;
             }
@@ -147,6 +161,19 @@ public final class HiddenLayerTrain implements Serializable {
         	
         	logger.info("train done for this iteration-" + epoch);
         	
+			/**
+			 * 1 parameter output
+			 */
+			if (config.isParamOutput() && (0 == (epoch % config.getParamOutputStep()))) {
+				SGDPersistableWrite.output(config.getParamOutputPath(), hLayer);
+			}
+            
+            /**
+             * 2 loss print
+             */
+            if(!config.isPrintLoss()) {
+            	continue;
+            }
         	if (0 != (epoch % config.getLossCalStep())) {
                 continue;
             }

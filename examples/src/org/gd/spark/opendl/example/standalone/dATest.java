@@ -37,6 +37,8 @@ public class dATest {
             config.setNbrModelReplica(4);
             config.setMinLoss(0.01);
             config.setUseRegularization(true);
+            config.setPrintLoss(true);
+            config.setLossCalStep(3);
             
             logger.info("Start to train dA.");
             HiddenLayerTrain.train(da, trainList, config);

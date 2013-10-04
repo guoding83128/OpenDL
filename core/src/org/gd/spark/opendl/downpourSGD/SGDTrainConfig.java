@@ -47,8 +47,15 @@ public class SGDTrainConfig implements Serializable {
     /**
      * caculate loss function
      */
-    public int lossCalStep = 1; // if step <= 0, no loss cal, so only stop with maxEpochs.
-    public boolean printLoss = true;
+    public int lossCalStep = 1; //calculate and print total loss every calStep
+    public boolean printLoss = false;
+    
+    /**
+     * parameter output during each epoche of training
+     */
+    public boolean paramOutput = false;
+    public int paramOutputStep = 5; //parameter output every paramOutputStep
+    public String paramOutputPath = null;
 
     /**
      * for dA
