@@ -1,97 +1,45 @@
 OpenDL-The deep learning training library based on Spark framework
 
-1 Package brief
-  
-1.1 package org.gd.spark.opendl.downpourSGD.hLayer
-    The hidden layer data struct and train work architecture, meanly the core package. 
+# 1 Core idea
 
-Class HiddenLayer: 
-    Defines the abstract class for some possible hidden layer implementation(eg, AutoEncoder, dA, RBM). It has also some interface method related to reconstruct data and hidden layer output(sigmod). 
+The Google scientist, Jeffrey Dean promotes one way to large scale data¡¯s DeepLearning training with distributed platform, named DistBelief [1]. The key idea is model replica, each one takes the same current model parameters, but get the different data shards to train; then each model replica update the gradient to central parameter server.
+
+My framework splits the train data into different data shards, each one will be trained by the model replica. After all model replica finish the current epoch train, the update gradient will be reduced to update totally; then each model replica will start the next epoch train with new parameter until convergence or get to some stop conditions. The model replica can train the data with different way based on gradient update; eg, mini-batch gradient descent, Conjugate gradient, or L-BFGS.(CG always win the best result).
+
+So the algorithm in OpenDL should be gradient update support. Like LogisticRegression(Softmax), Backpropagation, AutoEncoder, RBM, Convolution and so on, all of them can be incorporated into OpenDL framework. 
+
+# 2 Third party software
+
+Besides some of the Apache common software modules, the OpenDL developed with three open source project.
     
-Class HiddenLayerTrain: 
-    Define the static interface to hidden layer train work, both for multiple thread with standalone machine or Spark framework. 
+The Spark light cluster computing platform, refer to http://spark.incubator.apache.org/. Now we just use the latest version, 0.8.0 just released recently. 
     
-Class HiddenLayerOptimizer: 
-    Define the ConjugateGradient implementation for hidden layer. The sub class need just override the loss function and gradient update calculation implementation. Refer to Mallet project(http://mallet.cs.umass.edu/). 
+The Mallet, java based machine learning package of UMASS, refer to http://mallet.cs.umass.edu/. We use this one mainly for mathematical algorithm, eg, conjugate gradient, L-BFGS. 
+    
+The last is JBlas, library of Linear Algebra for Java, refer to http://mikiobraun.github.io/jblas/. It has been used mainly for matrix computation optimization. So before we run the OpenDL program on Windows, Unix, Linux, MacOS, must check the OS platform for JBlas runtime support with "java -server -jar jblas-1.2.3.jar", then get the basic install and benchmark information. 
 
-Class DeltaThread:
-    The model replica train thread for multiple thread standalone mechanism. The model replica idea refer to Google's DistBelief.
+# 3 File organization
 
-Class DeltaSpark:
-    The model replca train function class for Spark framework. The model replica idea refer to Google's DistBelief.
+    core/  Main core source and maven pom.xml.
 
-Class LossThread:
-    The loss calculation thread work.
+    examples/ Some example code. 
 
-Class LossSpark:
-    The loss calculation spark work.
+    dep_lib/ All dependency jar file.
 
-1.2 package org.gd.spark.opendl.downpourSGD.hLayer.dA
-    The Denoising Autoencoders implementation package, refer to http://deeplearning.net/tutorial/dA.html.
+    dist/ Distribute jar.
 
-CLass dA:
-    The sub-class of HiddenLayer, override the reconstruct, gradientUpdateMiniBatch(batch gradient descent), gradientUpdateCG(conjugate gradient); and also define the optimizer for dA algorithm. 
+    doc/ Include java doc, some related papers.
 
-1.3 package org.gd.spark.opendl.downpourSGD.hLayer.RBM
-    The Restricted Boltzmann Machines implementation package, refer to http://deeplearning.net/tutorial/rbm.html.
-
-Class RBM:
-    The sub-class of HiddenLayer, override the reconstruct, gradientUpdateMiniBatch(batch gradient descent), gradientUpdateCG(conjugate gradient); and also define the optimizer for RBM algorithm.
-
-1.4 package org.gd.spark.opendl.downpourSGD.lr
-    The LogisticRegression(Softmax) related implementation package. In fact, there also many LR implementation utility package. In our LR work, still the downpourSGD mechanism for large scale data. 
-
-Class LR:
-    Define LogisticRegression(Softmax) node data struct, also some interface for prediction.
-
-Class LRTrain:
-    LR train work both for multiple thread work or Spark framework.
-
-Class DeltaThread, DeltaSpark, LossThread, LossSpark:
-    Similar with HiddenLayer package class with same name. 
-
-1.5 package org.gd.spark.opendl.downpourSGD
-    The downpourSGD mechanism related package.
-
-Class ModelReplicaSplit:
-    Define the data split for model replica with Spark framework. 
-
-Class SampleVector:
-    Base data struct of sample both used for supervised or unsupervised learning.
-
-Interface SGDPersistable:
-    Define the deep networking node persist interface. 
-
-Class SGDTrainConfig:
-    Define all train parameter in one data struct. 
-
-1.6 package org.gd.spark.opendl.util
-    Contain some math utility class.
-
-2 Example usage.
-
-  Refer to example code and doc.  
+    Readme.txt Some information about the core source architecture. 
 
 
+# 4 Content information
+    Author info:
+    GuoDing, 
+    email: guoding83128@163.com, guoding83128@gmail.com
+    Sina Weibo: http://weibo.com/u/1776636363/
+    Twitter: https://twitter.com/guoding83128 
+    Google group:
+    broad will be created soon! 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
- 
+# Any suggestion are welcome. 
