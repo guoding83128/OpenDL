@@ -1,9 +1,7 @@
-package org.gd.spark.opendl.downpourSGD.hLayer.RBM;
+package org.gd.spark.opendl.downpourSGD.old.hLayer;
 
 import org.apache.log4j.Logger;
 import org.gd.spark.opendl.downpourSGD.SGDTrainConfig;
-import org.gd.spark.opendl.downpourSGD.hLayer.HiddenLayer;
-import org.gd.spark.opendl.downpourSGD.hLayer.HiddenLayerOptimizer;
 import org.gd.spark.opendl.util.MathUtil;
 import org.gd.spark.opendl.util.MyConjugateGradient;
 import org.jblas.DoubleMatrix;

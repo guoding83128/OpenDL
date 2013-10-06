@@ -1,4 +1,4 @@
-package org.gd.spark.opendl.downpourSGD.hLayer;
+package org.gd.spark.opendl.downpourSGD.old.hLayer;
 
 import org.gd.spark.opendl.downpourSGD.SGDTrainConfig;
 import org.jblas.DoubleMatrix;
@@ -11,7 +11,7 @@ import cc.mallet.optimize.Optimizable;
  * @author GuoDing
  * @since 2013-08-15
  */
-abstract class HiddenLayerOptimizer implements Optimizable.ByGradientValue {
+public abstract class HiddenLayerOptimizer implements Optimizable.ByGradientValue {
     protected SGDTrainConfig myConfig;
     protected int my_n_visible;
     protected int my_n_hidden;

@@ -1,4 +1,4 @@
-package org.gd.spark.opendl.downpourSGD.lr;
+package org.gd.spark.opendl.downpourSGD.train;
 
 import java.util.Collections;
 import java.util.List;
@@ -9,37 +9,32 @@ import org.gd.spark.opendl.util.MathUtil;
 import org.jblas.DoubleMatrix;
 
 final class DeltaThread implements Runnable {
-    private LR lr;
+    private SGDBase sgd;
     private SGDTrainConfig trainConfig;
-    private DoubleMatrix my_w;
-    private DoubleMatrix my_b;
+    private SGDParam my_param;
+    private List<SampleVector> samples;
     private DoubleMatrix x_samples;
     private DoubleMatrix y_samples;
     private boolean running = false;
     private int curr_epoch = 0;
 
-    public DeltaThread(LR _lr, SGDTrainConfig config, List<SampleVector> xy) {
-        this.lr = _lr;
+    public DeltaThread(SGDBase _sgd, SGDTrainConfig config, List<SampleVector> xy) {
+        this.sgd = _sgd;
         this.trainConfig = config;
         Collections.shuffle(xy);
+        this.samples = xy;
         this.x_samples = MathUtil.convertX2Matrix(xy);
-        this.y_samples = MathUtil.convertY2Matrix(xy);
+        if(this.sgd.isSupervise()) {
+            this.y_samples = MathUtil.convertY2Matrix(xy);
+        }
     }
-
-    public DoubleMatrix getW() {
-        return this.my_w;
+    
+    public SGDParam getParam() {
+    	return this.my_param;
     }
-
-    public DoubleMatrix getB() {
-        return this.my_b;
-    }
-
-    public DoubleMatrix getX() {
-        return this.x_samples;
-    }
-
-    public DoubleMatrix getY() {
-        return this.y_samples;
+    
+    public List<SampleVector> getSamples() {
+    	return this.samples;
     }
 
     public boolean isRunning() {
@@ -54,15 +49,15 @@ final class DeltaThread implements Runnable {
     @Override
 	public void run() {
 		this.running = true;
+		
 		// always get latest param
-		this.my_w = lr.getW().dup();
-		this.my_b = lr.getB().dup();
+		this.my_param = this.sgd.getParam().dup();
 
 		// check whether we use cg this time
 		if (this.trainConfig.isUseCG() && (this.curr_epoch <= this.trainConfig.getCgEpochStep())) {
-			this.lr.gradientUpdateCG(trainConfig, x_samples, y_samples, my_w, my_b);
+			this.sgd.gradientUpdateCG(trainConfig, x_samples, y_samples, my_param);
 		} else {
-			this.lr.gradientUpdateMiniBatch(trainConfig, x_samples, y_samples, my_w, my_b);
+			this.sgd.gradientUpdateMiniBatch(trainConfig, x_samples, y_samples, my_param);
 		}
 
 		this.running = false;

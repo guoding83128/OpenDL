@@ -6,8 +6,9 @@ import java.util.List;
 import org.apache.log4j.Logger;
 import org.gd.spark.opendl.downpourSGD.SGDTrainConfig;
 import org.gd.spark.opendl.downpourSGD.SampleVector;
-import org.gd.spark.opendl.downpourSGD.lr.LR;
-import org.gd.spark.opendl.downpourSGD.lr.LRTrain;
+import org.gd.spark.opendl.downpourSGD.old.lr.LR;
+import org.gd.spark.opendl.downpourSGD.old.lr.LRTrain;
+import org.gd.spark.opendl.downpourSGD.train.DownpourSGDTrain;
 import org.gd.spark.opendl.example.ClassVerify;
 import org.gd.spark.opendl.example.DataInput;
 
@@ -37,6 +38,7 @@ public class LRTest {
             config.setPrintLoss(true);
             
             logger.info("Start to train lr.");
+            //DownpourSGDTrain.train(lr, trainList, config);
             LRTrain.train(lr, trainList, config);
             
             int trueCount = 0;

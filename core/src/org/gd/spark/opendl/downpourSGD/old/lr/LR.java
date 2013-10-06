@@ -1,19 +1,17 @@
-package org.gd.spark.opendl.downpourSGD.lr;
+package org.gd.spark.opendl.downpourSGD.old.lr;
 
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
+import java.io.Serializable;
 import java.io.Writer;
-import java.util.List;
 
 import org.apache.log4j.Logger;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.function.Function;
+import org.gd.spark.opendl.downpourSGD.SGDPersistable;
 import org.gd.spark.opendl.downpourSGD.SGDTrainConfig;
 import org.gd.spark.opendl.downpourSGD.SampleVector;
-import org.gd.spark.opendl.downpourSGD.train.SGDBase;
-import org.gd.spark.opendl.downpourSGD.train.SGDParam;
-import org.gd.spark.opendl.util.MathUtil;
 import org.gd.spark.opendl.util.MyConjugateGradient;
 import org.jblas.DoubleMatrix;
 import org.jblas.MatrixFunctions;
@@ -27,12 +25,13 @@ import cc.mallet.optimize.Optimizable;
  * @author GuoDing
  * @since 2013-08-01
  */
-public final class LR extends SGDBase {
+public final class LR implements SGDPersistable, Serializable {
     private static final long serialVersionUID = 1L;
     private static final Logger logger = Logger.getLogger(LR.class);
     private int x_num;
     private int y_num;
-    private LRParam lrparam;
+    private DoubleMatrix w;
+    private DoubleMatrix b;
 
     /**
      * Constructor with random initial W&&B param
@@ -55,8 +54,16 @@ public final class LR extends SGDBase {
     public LR(int x_feature_num, int y_class_num, double[][] _w, double[] _b) {
         x_num = x_feature_num;
         y_num = y_class_num;
-        lrparam = new LRParam(x_feature_num, y_class_num, _w, _b);
-        param = lrparam;
+        if (null == _w) {
+            w = new DoubleMatrix(y_num, x_num);
+        } else {
+            w = new DoubleMatrix(_w);
+        }
+        if (null == _b) {
+            b = new DoubleMatrix(y_num);
+        } else {
+            b = new DoubleMatrix(_b);
+        }
     }
 
     /**
@@ -65,7 +72,7 @@ public final class LR extends SGDBase {
      * @return Predict result matrix (row=x's row, column=class num)
      */
     public final DoubleMatrix predict(DoubleMatrix x) {
-        DoubleMatrix y = x.mmul(lrparam.w.transpose()).addiRowVector(lrparam.b);
+        DoubleMatrix y = x.mmul(w.transpose()).addiRowVector(b);
         softmax(y);
         return y;
     }
@@ -79,9 +86,9 @@ public final class LR extends SGDBase {
         for (int i = 0; i < y_num; i++) {
             y[i] = 0;
             for (int j = 0; j < x_num; j++) {
-                y[i] += lrparam.w.get(i, j) * x[j];
+                y[i] += w.get(i, j) * x[j];
             }
-            y[i] += lrparam.b.get(i, 0);
+            y[i] += b.get(i, 0);
         }
         softmax(y);
     }
@@ -125,7 +132,7 @@ public final class LR extends SGDBase {
      * @return W param matrix
      */
     public DoubleMatrix getW() {
-        return lrparam.w;
+        return w;
     }
 
     /**
@@ -133,7 +140,7 @@ public final class LR extends SGDBase {
      * @return B param vector
      */
     public DoubleMatrix getB() {
-        return lrparam.b;
+        return b;
     }
 
     /**
@@ -152,17 +159,82 @@ public final class LR extends SGDBase {
         return y_num;
     }
 
+    /**
+     * Gradient descent with mini-batch
+     * 
+     * @param config Train config
+     * @param x_samples Input train samples X batch
+     * @param y_samples Input train samples Y batch
+     * @param curr_w W param matrix of current epoch
+     * @param curr_b B param vector of current epoch
+     */
+    protected final void gradientUpdateMiniBatch(SGDTrainConfig config, DoubleMatrix x_samples, DoubleMatrix y_samples, DoubleMatrix curr_w, DoubleMatrix curr_b) {
+    	int nbr_samples = x_samples.getRows();
+    	DoubleMatrix curr_predict_y = x_samples.mmul(curr_w.transpose()).addiRowVector(curr_b);
+        softmax(curr_predict_y);
+        DoubleMatrix delta_b = y_samples.sub(curr_predict_y);
+        DoubleMatrix delta_w = delta_b.transpose().mmul(x_samples);
+        delta_b = delta_b.columnSums().divi(nbr_samples);
+        delta_w.divi(nbr_samples);
+        
+        if (config.isUseRegularization()) {
+            if (0 != config.getLamada1()) {
+                delta_w.addi(MatrixFunctions.signum(curr_w).mmuli(config.getLamada1()));
+                delta_b.addi(MatrixFunctions.signum(curr_b).transpose().mmuli(config.getLamada1()));
+            }
+            if (0 != config.getLamada2()) {
+                delta_w.addi(curr_w.mmul(config.getLamada2()));
+                delta_b.addi(curr_b.transpose().mmul(config.getLamada2()));
+            }
+        }
+        
+        curr_w.addi(delta_w.muli(config.getLearningRate()));
+        curr_b.addi(delta_b.transpose().muli(config.getLearningRate()));
+    }
+
+    /**
+     * Conjugate gradient batch update
+     * 
+     * @param config Train config
+     * @param x_samples Input train samples X batch
+     * @param y_samples Input train samples Y batch
+     * @param curr_w W param matrix of current epoch
+     * @param curr_b B param vector of current epoch
+     */
+    protected final void gradientUpdateCG(SGDTrainConfig config, DoubleMatrix x_samples, DoubleMatrix y_samples,
+            DoubleMatrix curr_w, DoubleMatrix curr_b) {
+        LROptimizer lropt = new LROptimizer(config, x_samples, y_samples, curr_w, curr_b);
+        MyConjugateGradient cg = new MyConjugateGradient(lropt, config.getCgInitStepSize());
+        cg.setTolerance(config.getCgTolerance());
+        try {
+            cg.optimize(config.getCgMaxIterations());
+        } catch (Throwable e) {
+            logger.error("", e);
+        } 
+    }
+
+    /**
+     * Merge param update with one model replica
+     * @param new_w W param matrix update
+     * @param new_b B param vector update
+     * @param nbr_model Number of model replica
+     */
+    protected final void mergeParam(DoubleMatrix new_w, DoubleMatrix new_b, int nbr_model) {
+        w.addi(new_w.sub(w).divi(nbr_model));
+        b.addi(new_b.sub(b).divi(nbr_model));
+    }
+
     @Override
     public final void read(DataInput in) throws IOException {
         x_num = in.readInt();
         y_num = in.readInt();
         for (int i = 0; i < y_num; i++) {
             for (int j = 0; j < x_num; j++) {
-            	lrparam.w.put(i, j, in.readDouble());
+                w.put(i, j, in.readDouble());
             }
         }
         for (int i = 0; i < y_num; i++) {
-        	lrparam.b.put(i, 0, in.readDouble());
+            b.put(i, 0, in.readDouble());
         }
     }
 
@@ -172,11 +244,11 @@ public final class LR extends SGDBase {
         out.writeInt(y_num);
         for (int i = 0; i < y_num; i++) {
             for (int j = 0; j < x_num; j++) {
-                out.writeDouble(lrparam.w.get(i, i));
+                out.writeDouble(w.get(i, i));
             }
         }
         for (int i = 0; i < y_num; i++) {
-            out.writeDouble(lrparam.b.get(i, 0));
+            out.writeDouble(b.get(i, 0));
         }
     }
 
@@ -189,13 +261,13 @@ public final class LR extends SGDBase {
         wr.write(newLine);
         for (int i = 0; i < y_num; i++) {
             for (int j = 0; j < x_num; j++) {
-                wr.write(String.valueOf(lrparam.w.get(i, i)));
+                wr.write(String.valueOf(w.get(i, i)));
                 wr.write(",");
             }
             wr.write(newLine);
         }
         for (int i = 0; i < y_num; i++) {
-            wr.write(String.valueOf(lrparam.b.get(i, 0)));
+            wr.write(String.valueOf(b.get(i, 0)));
             wr.write(",");
         }
         wr.write(newLine);
@@ -338,67 +410,4 @@ public final class LR extends SGDBase {
 			return ret;
 		}
     }
-
-	@Override
-	public void gradientUpdateMiniBatch(SGDTrainConfig config, DoubleMatrix x_samples, DoubleMatrix y_samples, SGDParam curr_param) {
-		int nbr_samples = x_samples.rows;
-		DoubleMatrix curr_w = ((LRParam)curr_param).w;
-		DoubleMatrix curr_b = ((LRParam)curr_param).b;
-		
-    	DoubleMatrix curr_predict_y = x_samples.mmul(curr_w.transpose()).addiRowVector(curr_b);
-        softmax(curr_predict_y);
-        DoubleMatrix delta_b = y_samples.sub(curr_predict_y);
-        DoubleMatrix delta_w = delta_b.transpose().mmul(x_samples);
-        delta_b = delta_b.columnSums().divi(nbr_samples);
-        delta_w.divi(nbr_samples);
-        
-        if (config.isUseRegularization()) {
-            if (0 != config.getLamada1()) {
-                delta_w.addi(MatrixFunctions.signum(curr_w).mmuli(config.getLamada1()));
-                delta_b.addi(MatrixFunctions.signum(curr_b).transpose().mmuli(config.getLamada1()));
-            }
-            if (0 != config.getLamada2()) {
-                delta_w.addi(curr_w.mmul(config.getLamada2()));
-                delta_b.addi(curr_b.transpose().mmul(config.getLamada2()));
-            }
-        }
-        
-        curr_w.addi(delta_w.muli(config.getLearningRate()));
-        curr_b.addi(delta_b.transpose().muli(config.getLearningRate()));
-	}
-
-	@Override
-	public void gradientUpdateCG(SGDTrainConfig config, DoubleMatrix x_samples, DoubleMatrix y_samples, SGDParam curr_param) {
-		DoubleMatrix curr_w = ((LRParam)curr_param).w;
-		DoubleMatrix curr_b = ((LRParam)curr_param).b;
-		
-		LROptimizer lropt = new LROptimizer(config, x_samples, y_samples, curr_w, curr_b);
-        MyConjugateGradient cg = new MyConjugateGradient(lropt, config.getCgInitStepSize());
-        cg.setTolerance(config.getCgTolerance());
-        try {
-            cg.optimize(config.getCgMaxIterations());
-        } catch (Throwable e) {
-            logger.error("", e);
-        } 
-	}
-
-	@Override
-	public void mergeParam(SGDParam new_param, int nrModelReplica) {
-		LRParam new_lrparam = (LRParam)new_param;
-		lrparam.w.addi(new_lrparam.w.sub(lrparam.w).divi(nrModelReplica));
-    	lrparam.b.addi(new_lrparam.b.sub(lrparam.b).divi(nrModelReplica));
-	}
-
-	@Override
-	public double loss(List<SampleVector> samples) {
-		DoubleMatrix x_samples = MathUtil.convertX2Matrix(samples);
-        DoubleMatrix y_samples = MathUtil.convertY2Matrix(samples);
-        DoubleMatrix predict_y = predict(x_samples);
-        return MatrixFunctions.powi(predict_y.sub(y_samples), 2).sum();
-	}
-
-	@Override
-	public boolean isSupervise() {
-		return true;
-	}
 }

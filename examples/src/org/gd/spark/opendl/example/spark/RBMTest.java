@@ -9,8 +9,8 @@ import org.apache.spark.api.java.JavaSparkContext;
 import org.apache.spark.storage.StorageLevel;
 import org.gd.spark.opendl.downpourSGD.SGDTrainConfig;
 import org.gd.spark.opendl.downpourSGD.SampleVector;
-import org.gd.spark.opendl.downpourSGD.hLayer.HiddenLayerTrain;
-import org.gd.spark.opendl.downpourSGD.hLayer.RBM.RBM;
+import org.gd.spark.opendl.downpourSGD.hLayer.RBM;
+import org.gd.spark.opendl.downpourSGD.train.DownpourSGDTrain;
 import org.gd.spark.opendl.example.ClassVerify;
 import org.gd.spark.opendl.example.DataInput;
 
@@ -47,7 +47,7 @@ public class RBMTest {
             config.setLossCalStep(3);
             
             logger.info("Start to train RBM.");
-            HiddenLayerTrain.train(rbm, rdds, config);
+            DownpourSGDTrain.train(rbm, rdds, config);
             
             double[] reconstruct_x = new double[x_feature];
             double totalError = 0;

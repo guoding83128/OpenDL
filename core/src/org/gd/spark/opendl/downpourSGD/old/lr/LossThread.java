@@ -1,4 +1,4 @@
-package org.gd.spark.opendl.downpourSGD.lr;
+package org.gd.spark.opendl.downpourSGD.old.lr;
 
 import org.jblas.DoubleMatrix;
 import org.jblas.MatrixFunctions;

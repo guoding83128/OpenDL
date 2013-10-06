@@ -10,9 +10,9 @@ import org.apache.spark.storage.StorageLevel;
 import org.gd.spark.opendl.downpourSGD.SGDTrainConfig;
 import org.gd.spark.opendl.downpourSGD.SampleVector;
 import org.gd.spark.opendl.downpourSGD.lr.LR;
-import org.gd.spark.opendl.downpourSGD.lr.LRTrain;
 import org.gd.spark.opendl.example.ClassVerify;
 import org.gd.spark.opendl.example.DataInput;
+import org.gd.spark.opendl.downpourSGD.train.DownpourSGDTrain;
 
 public class LRTest {
 	private static final Logger logger = Logger.getLogger(LRTest.class);
@@ -50,7 +50,7 @@ public class LRTest {
             config.setParamOutputPath("wb.bin");
             
             logger.info("Start to train lr.");
-            LRTrain.train(lr, rdds, config);
+            DownpourSGDTrain.train(lr, rdds, config);
             
             int trueCount = 0;
             int falseCount = 0;

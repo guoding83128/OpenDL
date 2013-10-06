@@ -1,19 +1,18 @@
-package org.gd.spark.opendl.downpourSGD.hLayer;
+package org.gd.spark.opendl.downpourSGD.old.hLayer;
 
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
+import java.io.Serializable;
 import java.io.Writer;
-import java.util.List;
 
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.function.Function;
+import org.gd.spark.opendl.downpourSGD.SGDPersistable;
+import org.gd.spark.opendl.downpourSGD.SGDTrainConfig;
 import org.gd.spark.opendl.downpourSGD.SampleVector;
-import org.gd.spark.opendl.downpourSGD.train.SGDBase;
-import org.gd.spark.opendl.downpourSGD.train.SGDParam;
 import org.gd.spark.opendl.util.MathUtil;
 import org.jblas.DoubleMatrix;
-import org.jblas.MatrixFunctions;
 
 /**
  * Hidden layer node framework <p/>
@@ -22,11 +21,13 @@ import org.jblas.MatrixFunctions;
  * @author GuoDing
  * @since 2013-07-15
  */
-public abstract class HiddenLayer extends SGDBase {
+public abstract class HiddenLayer implements SGDPersistable, Serializable {
     private static final long serialVersionUID = 1L;
     protected int n_visible;
     protected int n_hidden;
-    protected HiddenLayerParam hlparam;
+    protected DoubleMatrix w;
+    protected DoubleMatrix hbias;
+    protected DoubleMatrix vbias;
 
     /**
      * Constructor with random initial parameters
@@ -49,8 +50,25 @@ public abstract class HiddenLayer extends SGDBase {
     public HiddenLayer(int _n_in, int _n_out, double[][] _w, double[] _b) {
         n_visible = _n_in;
         n_hidden = _n_out;
-        hlparam = new HiddenLayerParam(_n_in, _n_out, _w, _b);
-        param = hlparam;
+
+        if (null == _w) {
+            w = new DoubleMatrix(n_hidden, n_visible);
+            double a = 1.0 / n_visible;
+            for (int i = 0; i < n_hidden; i++) {
+                for (int j = 0; j < n_visible; j++) {
+                    w.put(i, j, MathUtil.uniform(-a, a));
+                }
+            }
+        } else {
+            w = new DoubleMatrix(_w);
+        }
+
+        if (null == _b) {
+            this.hbias = new DoubleMatrix(n_hidden);
+        } else {
+            this.hbias = new DoubleMatrix(_b);
+        }
+        vbias = new DoubleMatrix(n_visible);
     }
 
     /**
@@ -59,7 +77,7 @@ public abstract class HiddenLayer extends SGDBase {
      * @return Hidden layer output matrix
      */
     public final DoubleMatrix sigmod_output(DoubleMatrix input) {
-        DoubleMatrix ret = input.mmul(hlparam.w.transpose()).addiRowVector(hlparam.hbias);
+        DoubleMatrix ret = input.mmul(w.transpose()).addiRowVector(hbias);
         MathUtil.sigmod(ret);
         return ret;
     }
@@ -73,9 +91,9 @@ public abstract class HiddenLayer extends SGDBase {
     	for (int i = 0; i < n_hidden; i++) {
     		hidden_x[i] = 0;
             for (int j = 0; j < n_visible; j++) {
-            	hidden_x[i] += hlparam.w.get(i, j) * visible_x[j];
+            	hidden_x[i] += w.get(i, j) * visible_x[j];
             }
-            hidden_x[i] += hlparam.hbias.get(i, 0);
+            hidden_x[i] += hbias.get(i, 0);
             hidden_x[i] = MathUtil.sigmod(hidden_x[i]);
         }
     }
@@ -91,15 +109,15 @@ public abstract class HiddenLayer extends SGDBase {
     }
 
     public DoubleMatrix getW() {
-        return hlparam.w;
+        return w;
     }
 
     public DoubleMatrix getHBias() {
-        return hlparam.hbias;
+        return hbias;
     }
 
     public DoubleMatrix getVBias() {
-        return hlparam.vbias;
+        return vbias;
     }
 
     public int getVisible() {
@@ -116,14 +134,14 @@ public abstract class HiddenLayer extends SGDBase {
         n_hidden = in.readInt();
         for (int i = 0; i < n_hidden; i++) {
             for (int j = 0; j < n_visible; j++) {
-            	hlparam.w.put(i, j, in.readDouble());
+                w.put(i, j, in.readDouble());
             }
         }
         for (int i = 0; i < n_hidden; i++) {
-        	hlparam.hbias.put(i, 0, in.readDouble());
+            hbias.put(i, 0, in.readDouble());
         }
         for (int i = 0; i < n_visible; i++) {
-        	hlparam.hbias.put(i, 0, in.readDouble());
+            hbias.put(i, 0, in.readDouble());
         }
     }
 
@@ -133,14 +151,14 @@ public abstract class HiddenLayer extends SGDBase {
         out.writeInt(n_hidden);
         for (int i = 0; i < n_hidden; i++) {
             for (int j = 0; j < n_visible; j++) {
-                out.writeDouble(hlparam.w.get(i, j));
+                out.writeDouble(w.get(i, j));
             }
         }
         for (int i = 0; i < n_hidden; i++) {
-            out.writeDouble(hlparam.hbias.get(i, 0));
+            out.writeDouble(hbias.get(i, 0));
         }
         for (int i = 0; i < n_visible; i++) {
-            out.writeDouble(hlparam.vbias.get(i, 0));
+            out.writeDouble(vbias.get(i, 0));
         }
     }
 
@@ -153,42 +171,58 @@ public abstract class HiddenLayer extends SGDBase {
         wr.write(newLine);
         for (int i = 0; i < n_hidden; i++) {
             for (int j = 0; j < n_visible; j++) {
-                wr.write(String.valueOf(hlparam.w.get(i, j)));
+                wr.write(String.valueOf(w.get(i, j)));
                 wr.write(",");
             }
             wr.write(newLine);
         }
         for (int i = 0; i < n_hidden; i++) {
-            wr.write(String.valueOf(hlparam.hbias.get(i, 0)));
+            wr.write(String.valueOf(hbias.get(i, 0)));
             wr.write(",");
         }
         wr.write(newLine);
         for (int i = 0; i < n_visible; i++) {
-            wr.write(String.valueOf(hlparam.vbias.get(i, 0)));
+            wr.write(String.valueOf(vbias.get(i, 0)));
             wr.write(",");
         }
         wr.write(newLine);
     }
-    
-    @Override
-	public final void mergeParam(SGDParam new_param, int nrModelReplica) {
-    	HiddenLayerParam new_hlparam = (HiddenLayerParam)new_param;
-    	hlparam.w.addi(new_hlparam.w.sub(hlparam.w).divi(nrModelReplica));
-    	hlparam.hbias.addi(new_hlparam.hbias.sub(hlparam.hbias).divi(nrModelReplica));
-    	hlparam.vbias.addi(new_hlparam.vbias.sub(hlparam.vbias).divi(nrModelReplica));
-	}
-    
-    @Override
-	public final double loss(List<SampleVector> samples) {
-    	DoubleMatrix x = MathUtil.convertX2Matrix(samples);
-        DoubleMatrix reconstruct_x = reconstruct(x);
-        return MatrixFunctions.powi(reconstruct_x.sub(x), 2).sum();
+
+    /**
+     * Merge param update with one model replica<p/>
+     * Notice: use average merge w = w + (deltaw1 + deltaw2 + ... + deltawm)/m <p/>
+     * @param new_w New updated weight matrix
+     * @param new_hbias New updated hidden layer bias vector
+     * @param new_vbias New updated visible layer bias vector
+     * @param nbr_model Number of model replica
+     */
+    protected final void mergeParam(DoubleMatrix new_w, DoubleMatrix new_hbias, DoubleMatrix new_vbias, int nbr_model) {
+        w.addi(new_w.sub(w).divi(nbr_model));
+        hbias.addi(new_hbias.sub(hbias).divi(nbr_model));
+        vbias.addi(new_vbias.sub(vbias).divi(nbr_model));
     }
-    
-    @Override
-	public final boolean isSupervise() {
-		return false;
-	}
+
+    /**
+     * Gradient descent with mini-batch
+     * @param config Train config
+     * @param samples Input samples
+     * @param curr_w W matrix of current epoch
+     * @param curr_hbias Hidden bias vector of current epoch
+     * @param curr_vbias Visible bias matrix of current epoch
+     */
+    protected abstract void gradientUpdateMiniBatch(SGDTrainConfig config, DoubleMatrix samples, DoubleMatrix curr_w,
+            DoubleMatrix curr_hbias, DoubleMatrix curr_vbias);
+
+    /**
+     * Conjugate gradient batch update
+     * @param config Train config
+     * @param samples Input samples
+     * @param curr_w W matrix of current epoch
+     * @param curr_hbias Hidden bias vector of current epoch
+     * @param curr_vbias Visible bias matrix of current epoch
+     */
+    protected abstract void gradientUpdateCG(SGDTrainConfig config, DoubleMatrix samples, DoubleMatrix curr_w,
+            DoubleMatrix curr_hbias, DoubleMatrix curr_vbias);
 
     /**
      * Reconstruct process: from input layer to hidden layer<p/>

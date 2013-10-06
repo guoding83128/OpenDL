@@ -1,7 +1,7 @@
-package org.gd.spark.opendl.downpourSGD.DeepNetwork;
+package org.gd.spark.opendl.example.DeepNetwork;
 
-import org.gd.spark.opendl.downpourSGD.hLayer.HiddenLayer;
-import org.gd.spark.opendl.downpourSGD.hLayer.dA.dA;
+import org.gd.spark.opendl.downpourSGD.old.hLayer.HiddenLayer;
+import org.gd.spark.opendl.downpourSGD.old.hLayer.dA;
 
 public final class SdA extends DeepNetwork {
     private static final long serialVersionUID = 1L;

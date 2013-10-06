@@ -1,7 +1,7 @@
-package org.gd.spark.opendl.downpourSGD.DeepNetwork;
+package org.gd.spark.opendl.example.DeepNetwork;
 
-import org.gd.spark.opendl.downpourSGD.hLayer.HiddenLayer;
-import org.gd.spark.opendl.downpourSGD.hLayer.RBM.RBM;
+import org.gd.spark.opendl.downpourSGD.old.hLayer.HiddenLayer;
+import org.gd.spark.opendl.downpourSGD.old.hLayer.RBM;
 
 public final class DBN extends DeepNetwork {
     private static final long serialVersionUID = 1L;

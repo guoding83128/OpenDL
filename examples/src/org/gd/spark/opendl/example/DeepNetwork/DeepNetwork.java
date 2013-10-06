@@ -1,4 +1,4 @@
-package org.gd.spark.opendl.downpourSGD.DeepNetwork;
+package org.gd.spark.opendl.example.DeepNetwork;
 
 import java.io.DataInput;
 import java.io.DataOutput;
@@ -13,11 +13,10 @@ import org.apache.spark.api.java.JavaRDD;
 import org.gd.spark.opendl.downpourSGD.SGDPersistable;
 import org.gd.spark.opendl.downpourSGD.SGDTrainConfig;
 import org.gd.spark.opendl.downpourSGD.SampleVector;
-import org.gd.spark.opendl.downpourSGD.hLayer.HiddenLayer;
-import org.gd.spark.opendl.downpourSGD.hLayer.HiddenLayerTrain;
-import org.gd.spark.opendl.downpourSGD.lr.LR;
-import org.gd.spark.opendl.downpourSGD.lr.LRTrain;
-import org.jblas.DoubleMatrix;
+import org.gd.spark.opendl.downpourSGD.old.hLayer.HiddenLayer;
+import org.gd.spark.opendl.downpourSGD.old.hLayer.HiddenLayerTrain;
+import org.gd.spark.opendl.downpourSGD.old.lr.LR;
+import org.gd.spark.opendl.downpourSGD.old.lr.LRTrain;
 
 
 /**
@@ -204,21 +203,6 @@ public abstract class DeepNetwork implements SGDPersistable, Serializable {
 
         // lr final
         lrNode.predict(curr_input, predict_y);
-    }
-    
-    /**
-     * Do the prediction work with batch data
-     * @param x
-     */
-    public final DoubleMatrix predict(DoubleMatrix x) {
-    	DoubleMatrix curr_input = x;
-    	
-    	// hidden layer forwarding
-        for (int i = 0; i < n_layers; i++) {
-        	curr_input = hidden_layer[i].sigmod_output(curr_input);
-        }
-        
-        return lrNode.predict(curr_input);
     }
 
     @Override

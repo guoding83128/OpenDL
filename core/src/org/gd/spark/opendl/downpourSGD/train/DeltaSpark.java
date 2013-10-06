@@ -1,4 +1,4 @@
-package org.gd.spark.opendl.downpourSGD.lr;
+package org.gd.spark.opendl.downpourSGD.train;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -14,30 +14,20 @@ import org.jblas.DoubleMatrix;
 
 final class DeltaSpark extends Function<Tuple2<Integer, List<SampleVector>>, DeltaSpark> {
     private static final long serialVersionUID = 1L;
-    private LR lr;
+    private SGDBase sgd;
     private SGDTrainConfig trainConfig;
-    private DoubleMatrix my_w;
-    private DoubleMatrix my_b;
+    private SGDParam my_param;
     private int curr_epoch = 0;
 
-    public DeltaSpark(LR _lr, SGDTrainConfig config, int epoch) {
-        this.lr = _lr;
+    public DeltaSpark(SGDBase _sgd, SGDTrainConfig config, int epoch) {
+        this.sgd = _sgd;
         this.trainConfig = config;
         this.curr_epoch = epoch;
-        my_w = lr.getW().dup();
-        my_b = lr.getB().dup();
+        this.my_param = this.sgd.getParam().dup();
     }
 
-    public DoubleMatrix getW() {
-        return this.my_w;
-    }
-
-    public DoubleMatrix getB() {
-        return this.my_b;
-    }
-
-    public LR getLR() {
-        return this.lr;
+    public SGDParam getParam() {
+    	return this.my_param;
     }
 
     @Override
@@ -47,15 +37,18 @@ final class DeltaSpark extends Function<Tuple2<Integer, List<SampleVector>>, Del
             myList.add(v);
         }
         Collections.shuffle(myList);
-
+        
         DoubleMatrix x_samples = MathUtil.convertX2Matrix(myList);
-        DoubleMatrix y_samples = MathUtil.convertY2Matrix(myList);
+        DoubleMatrix y_samples = null;
+        if(this.sgd.isSupervise()) {
+        	y_samples = MathUtil.convertY2Matrix(myList);
+        }
 
         // check whether we use cg this time
         if (this.trainConfig.isUseCG() && (this.curr_epoch <= this.trainConfig.getCgEpochStep())) {
-            this.lr.gradientUpdateCG(trainConfig, x_samples, y_samples, my_w, my_b);
+        	this.sgd.gradientUpdateCG(trainConfig, x_samples, y_samples, my_param);
         } else {
-            this.lr.gradientUpdateMiniBatch(trainConfig, x_samples, y_samples, my_w, my_b);
+        	this.sgd.gradientUpdateMiniBatch(trainConfig, x_samples, y_samples, my_param);
         }
         return this;
     }

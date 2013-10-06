@@ -9,8 +9,8 @@ import org.apache.spark.api.java.JavaSparkContext;
 import org.apache.spark.storage.StorageLevel;
 import org.gd.spark.opendl.downpourSGD.SGDTrainConfig;
 import org.gd.spark.opendl.downpourSGD.SampleVector;
-import org.gd.spark.opendl.downpourSGD.hLayer.HiddenLayerTrain;
-import org.gd.spark.opendl.downpourSGD.hLayer.dA.dA;
+import org.gd.spark.opendl.downpourSGD.hLayer.dA;
+import org.gd.spark.opendl.downpourSGD.train.DownpourSGDTrain;
 import org.gd.spark.opendl.example.ClassVerify;
 import org.gd.spark.opendl.example.DataInput;
 
@@ -50,7 +50,7 @@ public class dATest {
             config.setLossCalStep(3);
             
             logger.info("Start to train dA.");
-            HiddenLayerTrain.train(da, rdds, config);
+            DownpourSGDTrain.train(da, rdds, config);
             
             double[] reconstruct_x = new double[x_feature];
             double totalError = 0;
