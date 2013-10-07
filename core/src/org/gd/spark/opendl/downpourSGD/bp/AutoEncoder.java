@@ -15,8 +15,11 @@
  */
 package org.gd.spark.opendl.downpourSGD.bp;
 
+import java.util.List;
+
 import org.apache.log4j.Logger;
 import org.gd.spark.opendl.downpourSGD.SGDTrainConfig;
+import org.gd.spark.opendl.downpourSGD.SampleVector;
 import org.gd.spark.opendl.downpourSGD.train.SGDParam;
 import org.gd.spark.opendl.util.MathUtil;
 import org.gd.spark.opendl.util.MyConjugateGradient;
@@ -43,6 +46,25 @@ public class AutoEncoder extends BP {
 	}
 	
 	/**
+	 * Hidden layer output
+	 * @param input
+	 * @return
+	 */
+	public final DoubleMatrix hidden_output(DoubleMatrix input) {
+		DoubleMatrix ret = input.mmul(bpparam.w[0].transpose()).addiRowVector(bpparam.b[0]);
+		MathUtil.sigmod(ret);
+		return ret;
+	}
+	
+	public void hidden_output(double[] x, double[] hidden_layer) {
+		DoubleMatrix x_m = new DoubleMatrix(x).transpose();
+    	DoubleMatrix ret = hidden_output(x_m);
+    	for(int i = 0; i < n_hiddens[0]; i++) {
+    		hidden_layer[i] = ret.get(0, i);
+    	}
+	}
+	
+	/**
 	 * Reconstruct, in fact same with super sigmod output
 	 * @param input
 	 * @return
@@ -63,6 +85,13 @@ public class AutoEncoder extends BP {
 	@Override
 	protected boolean isSupervise() {
 		return false;
+	}
+	
+	@Override
+	protected double loss(List<SampleVector> samples) {
+		DoubleMatrix x_samples = MathUtil.convertX2Matrix(samples);
+        DoubleMatrix reconstruct_x = reconstruct(x_samples);
+		return MatrixFunctions.powi(reconstruct_x.sub(x_samples), 2).sum();
 	}
 	
 	@Override
@@ -142,9 +171,15 @@ public class AutoEncoder extends BP {
 	
 	private class AEOptimizer extends BP.BPOptimizer {
 		private DoubleMatrix avg_hidden;
+		private DoubleMatrix tilde_x;
 
 		public AEOptimizer(SGDTrainConfig config, DoubleMatrix x_samples, BPParam curr_bpparam) {
 			super(config, x_samples, null, curr_bpparam);
+			if (config.isDoCorruption()) {
+                double p = 1 - config.getCorruption_level();
+                tilde_x = get_corrupted_input(x_samples, p);
+                activation[0] = tilde_x;
+            }
 		}
 		
 		@Override
@@ -156,7 +191,7 @@ public class AutoEncoder extends BP {
 				activation[i] = activation[i - 1].mmul(my_bpparam.w[i - 1].transpose()).addiRowVector(my_bpparam.b[i - 1]);
 				MathUtil.sigmod(activation[i]);
 			}
-			double loss = MatrixFunctions.powi(activation[my_bpparam.nl - 1].sub(my_x_samples), 2).sum() / nbr_samples;
+			double loss = MatrixFunctions.powi(activation[my_bpparam.nl - 1].sub(activation[0]), 2).sum() / nbr_samples;
 			
 			//regulation
 			if (my_config.isUseRegularization()) {
@@ -193,7 +228,7 @@ public class AutoEncoder extends BP {
 			 */
 			// 1 last layer
 			DoubleMatrix ai = activation[my_bpparam.nl - 1];
-			l_bias[my_bpparam.nl - 1] = ai.sub(my_y_samples).muli(ai).muli(ai.neg().addi(1));
+			l_bias[my_bpparam.nl - 1] = ai.sub(activation[0]).muli(ai).muli(ai.neg().addi(1));
 			
 			//2 back(no layer0 error need)
 			for(int i = my_bpparam.nl - 2; i >= 1; i--) {
@@ -239,4 +274,16 @@ public class AutoEncoder extends BP {
 			}
 		}
 	}
+	
+	private DoubleMatrix get_corrupted_input(DoubleMatrix x, double p) {
+        DoubleMatrix ret = new DoubleMatrix(x.getRows(), x.getColumns());
+        for (int i = 0; i < x.getRows(); i++) {
+            for (int j = 0; j < x.getColumns(); j++) {
+                if (0 != x.get(i, j)) {
+                    ret.put(i, j, MathUtil.binomial(1, p));
+                }
+            }
+        }
+        return ret;
+    }
 }
