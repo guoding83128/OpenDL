@@ -71,6 +71,13 @@ public class SGDTrainConfig implements Serializable {
     public boolean paramOutput = false;
     public int paramOutputStep = 5; //parameter output every paramOutputStep
     public String paramOutputPath = null;
+    
+    /**
+     * for AutoEncoder sparsity
+     */
+    public boolean forceSparsity = false;
+    public double sparsity = 0.05;
+    public double sparsityBeta = 0.01;
 
     /**
      * for dA

@@ -44,13 +44,36 @@ public class BP extends SGDBase {
 	private static final long serialVersionUID = 1L;
 	private static final Logger logger = Logger.getLogger(BP.class);
 	
-	private int n_in;
-	private int n_out;
-	private int[] n_hiddens;
-	private BPParam bpparam;
+	protected int n_in;
+	protected int n_out;
+	protected int[] n_hiddens;
+	protected BPParam bpparam;
 	
 	public BP(int _in, int _out, int[] _hiddens) {
 		this(_in, _out, _hiddens, null, null);
+	}
+	
+	/**
+	 * Construct for auto encoder subclass
+	 * @param _visible
+	 * @param int_hidden
+	 */
+	protected BP(int _visible, int _hidden) {
+		this(_visible, _hidden, null, null);
+	}
+	
+	/**
+	 * Construct for auto encoder subclass with initial weights and bias
+	 * @param _visible
+	 * @param int_hidden
+	 */
+	protected BP(int _visible, int _hidden, DoubleMatrix[] _w, DoubleMatrix[] _b) {
+		n_in = _visible;
+		n_out = _visible;
+		n_hiddens = new int[1];
+		n_hiddens[0] = _hidden;
+		bpparam = new BPParam(n_in, n_out, n_hiddens, _w, _b);
+		param = bpparam;
 	}
 	
 	public BP(int _in, int _out, int[] _hiddens, DoubleMatrix[] _w, DoubleMatrix[] _b) {
@@ -250,13 +273,13 @@ public class BP extends SGDBase {
 		return true;
 	}
 
-	private class BPOptimizer implements Optimizable.ByGradientValue {
-		private int nbr_samples;
-        private SGDTrainConfig my_config;
-        private DoubleMatrix my_x_samples;
-        private DoubleMatrix my_y_samples;
-        private BPParam my_bpparam;
-        private DoubleMatrix[] activation;
+	protected static class BPOptimizer implements Optimizable.ByGradientValue {
+		protected int nbr_samples;
+		protected SGDTrainConfig my_config;
+		protected DoubleMatrix my_x_samples;
+		protected DoubleMatrix my_y_samples;
+		protected BPParam my_bpparam;
+		protected DoubleMatrix[] activation;
         
         public BPOptimizer(SGDTrainConfig config, DoubleMatrix x_samples, DoubleMatrix y_samples, BPParam curr_bpparam) {
         	my_x_samples = x_samples;

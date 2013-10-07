@@ -97,7 +97,12 @@ public class dA extends HiddenLayer {
         } else {
             delta_w = L_hbias.transpose().mmul(x_samples).addi(y.transpose().mmul(L_vbias));
         }
-        
+        if (config.isUseRegularization()) {
+			//only L2 for autoencoder
+			if (0 != config.getLamada2()) {
+				delta_w.subi(curr_w.mul(config.getLamada2()));
+            }
+		}
         delta_w.divi(nbr_sample);
         DoubleMatrix delta_hbias = L_hbias.columnSums().divi(nbr_sample);
         DoubleMatrix delta_vbias = L_vbias.columnSums().divi(nbr_sample);
@@ -162,6 +167,12 @@ public class dA extends HiddenLayer {
             MathUtil.sigmod(z);
 
             double loss = MatrixFunctions.powi(my_samples.sub(z), 2).sum() / nbr_sample;
+            if (myConfig.isUseRegularization()) {
+				//only L2 for autoencoder
+				if (0 != myConfig.getLamada2()) {
+                    loss += 0.5 * myConfig.getLamada2() * MatrixFunctions.pow(my_w, 2).sum();
+                }
+			}
             return -loss;
         }
 
@@ -175,6 +186,12 @@ public class dA extends HiddenLayer {
             } else {
                 delta_w = L_hbias.transpose().mmul(my_samples).addi(y.transpose().mmul(L_vbias));
             }
+            if (myConfig.isUseRegularization()) {
+				//only L2 for autoencoder
+				if (0 != myConfig.getLamada2()) {
+					delta_w.subi(my_w.mul(myConfig.getLamada2()));
+                }
+			}
             delta_w.divi(nbr_sample);
             DoubleMatrix delta_hbias = L_hbias.columnSums().divi(nbr_sample);
             DoubleMatrix delta_vbias = L_vbias.columnSums().divi(nbr_sample);

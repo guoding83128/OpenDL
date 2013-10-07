@@ -32,13 +32,12 @@ public class dATest {
             config.setCorruption_level(0.25);
             config.setCgEpochStep(50);
             config.setCgTolerance(0);
-            config.setCgMaxIterations(10);
+            config.setCgMaxIterations(30);
             config.setMaxEpochs(50);
             config.setNbrModelReplica(4);
             config.setMinLoss(0.01);
             config.setUseRegularization(true);
             config.setPrintLoss(true);
-            config.setLossCalStep(3);
             
             logger.info("Start to train dA.");
             DownpourSGDTrain.train(da, trainList, config);
