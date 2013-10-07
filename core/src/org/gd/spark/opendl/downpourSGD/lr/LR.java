@@ -1,3 +1,18 @@
+/*
+ * Copyright 2013 GuoDing
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.gd.spark.opendl.downpourSGD.lr;
 
 import java.io.DataInput;
@@ -340,7 +355,7 @@ public final class LR extends SGDBase {
     }
 
 	@Override
-	public void gradientUpdateMiniBatch(SGDTrainConfig config, DoubleMatrix x_samples, DoubleMatrix y_samples, SGDParam curr_param) {
+	protected void gradientUpdateMiniBatch(SGDTrainConfig config, DoubleMatrix x_samples, DoubleMatrix y_samples, SGDParam curr_param) {
 		int nbr_samples = x_samples.rows;
 		DoubleMatrix curr_w = ((LRParam)curr_param).w;
 		DoubleMatrix curr_b = ((LRParam)curr_param).b;
@@ -368,7 +383,7 @@ public final class LR extends SGDBase {
 	}
 
 	@Override
-	public void gradientUpdateCG(SGDTrainConfig config, DoubleMatrix x_samples, DoubleMatrix y_samples, SGDParam curr_param) {
+	protected void gradientUpdateCG(SGDTrainConfig config, DoubleMatrix x_samples, DoubleMatrix y_samples, SGDParam curr_param) {
 		DoubleMatrix curr_w = ((LRParam)curr_param).w;
 		DoubleMatrix curr_b = ((LRParam)curr_param).b;
 		
@@ -383,14 +398,14 @@ public final class LR extends SGDBase {
 	}
 
 	@Override
-	public void mergeParam(SGDParam new_param, int nrModelReplica) {
+	protected void mergeParam(SGDParam new_param, int nrModelReplica) {
 		LRParam new_lrparam = (LRParam)new_param;
 		lrparam.w.addi(new_lrparam.w.sub(lrparam.w).divi(nrModelReplica));
     	lrparam.b.addi(new_lrparam.b.sub(lrparam.b).divi(nrModelReplica));
 	}
 
 	@Override
-	public double loss(List<SampleVector> samples) {
+	protected double loss(List<SampleVector> samples) {
 		DoubleMatrix x_samples = MathUtil.convertX2Matrix(samples);
         DoubleMatrix y_samples = MathUtil.convertY2Matrix(samples);
         DoubleMatrix predict_y = predict(x_samples);
@@ -398,7 +413,7 @@ public final class LR extends SGDBase {
 	}
 
 	@Override
-	public boolean isSupervise() {
+	protected boolean isSupervise() {
 		return true;
 	}
 }

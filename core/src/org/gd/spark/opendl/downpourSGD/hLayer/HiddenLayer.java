@@ -1,3 +1,18 @@
+/*
+ * Copyright 2013 GuoDing
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.gd.spark.opendl.downpourSGD.hLayer;
 
 import java.io.DataInput;
@@ -171,7 +186,7 @@ public abstract class HiddenLayer extends SGDBase {
     }
     
     @Override
-	public final void mergeParam(SGDParam new_param, int nrModelReplica) {
+    protected final void mergeParam(SGDParam new_param, int nrModelReplica) {
     	HiddenLayerParam new_hlparam = (HiddenLayerParam)new_param;
     	hlparam.w.addi(new_hlparam.w.sub(hlparam.w).divi(nrModelReplica));
     	hlparam.hbias.addi(new_hlparam.hbias.sub(hlparam.hbias).divi(nrModelReplica));
@@ -179,14 +194,14 @@ public abstract class HiddenLayer extends SGDBase {
 	}
     
     @Override
-	public final double loss(List<SampleVector> samples) {
+    protected final double loss(List<SampleVector> samples) {
     	DoubleMatrix x = MathUtil.convertX2Matrix(samples);
         DoubleMatrix reconstruct_x = reconstruct(x);
         return MatrixFunctions.powi(reconstruct_x.sub(x), 2).sum();
     }
     
     @Override
-	public final boolean isSupervise() {
+    protected final boolean isSupervise() {
 		return false;
 	}
 

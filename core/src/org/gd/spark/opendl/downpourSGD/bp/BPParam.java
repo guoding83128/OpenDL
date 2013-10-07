@@ -1,14 +1,32 @@
+/*
+ * Copyright 2013 GuoDing
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.gd.spark.opendl.downpourSGD.bp;
 
+import java.util.Random;
+
 import org.gd.spark.opendl.downpourSGD.train.SGDParam;
-import org.gd.spark.opendl.util.MathUtil;
 import org.jblas.DoubleMatrix;
 
 class BPParam extends SGDParam {
 	private static final long serialVersionUID = 1L;
+	private static Random rand = new Random(System.currentTimeMillis());
     
 	protected DoubleMatrix[] w;
 	protected DoubleMatrix[] b;
+	protected int nl; //number of layer
 	
 	public BPParam(int _in, int _out, int[] _hiddens) {
 		this(_in, _out, _hiddens, null, null);
@@ -16,6 +34,7 @@ class BPParam extends SGDParam {
 	
 	public BPParam(int _in, int _out, int[] _hiddens, DoubleMatrix[] _w, DoubleMatrix[] _b) {
 		int l = _hiddens.length + 1;
+		nl = l + 1;
 		w = new DoubleMatrix[l];
 		b = new DoubleMatrix[l];
 		
@@ -42,10 +61,9 @@ class BPParam extends SGDParam {
 			}
 			else {
 				w[i] = new DoubleMatrix(curr_out, curr_in);
-				double a = 1.0 / curr_in;
 	            for (int j = 0; j < curr_out; j++) {
 	                for (int k = 0; k < curr_in; k++) {
-	                    w[i].put(j, k, MathUtil.uniform(-a, a));
+	                	w[i].put(j, k, rand.nextGaussian() * 0.01);
 	                }
 	            }
 			}
@@ -56,6 +74,9 @@ class BPParam extends SGDParam {
 			}
 			else {
 				b[i] = new DoubleMatrix(curr_out);
+				for (int j = 0; j < curr_out; j++) {
+					b[i].put(j, 0, rand.nextGaussian() * 0.01);
+				}
 			}
 		}
 	}
@@ -64,7 +85,7 @@ class BPParam extends SGDParam {
 	}
 	
 	@Override
-	public SGDParam dup() {
+	protected SGDParam dup() {
 		BPParam ret = new BPParam();
 		ret.w = new DoubleMatrix[w.length];
 		for(int i = 0; i < w.length; i++) {
@@ -74,6 +95,7 @@ class BPParam extends SGDParam {
 		for(int i = 0; i < b.length; i++) {
 			ret.b[i] = b[i].dup();
 		}
+		ret.nl = nl;
 		return ret;
 	}
 

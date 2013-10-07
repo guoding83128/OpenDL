@@ -1,3 +1,18 @@
+/*
+ * Copyright 2013 GuoDing
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.gd.spark.opendl.downpourSGD.hLayer;
 
 import org.apache.log4j.Logger;
@@ -47,7 +62,7 @@ public class dA extends HiddenLayer {
 	}
 
 	@Override
-	public void gradientUpdateMiniBatch(SGDTrainConfig config, DoubleMatrix x_samples, DoubleMatrix y_samples, SGDParam curr_param) {
+	protected void gradientUpdateMiniBatch(SGDTrainConfig config, DoubleMatrix x_samples, DoubleMatrix y_samples, SGDParam curr_param) {
     	int nbr_sample = x_samples.rows;
     	DoubleMatrix curr_w = ((HiddenLayerParam)curr_param).w;
     	DoubleMatrix curr_hbias = ((HiddenLayerParam)curr_param).hbias;
@@ -94,7 +109,7 @@ public class dA extends HiddenLayer {
 	}
 
 	@Override
-	public void gradientUpdateCG(SGDTrainConfig config, DoubleMatrix x_samples, DoubleMatrix y_samples, SGDParam curr_param) {
+	protected void gradientUpdateCG(SGDTrainConfig config, DoubleMatrix x_samples, DoubleMatrix y_samples, SGDParam curr_param) {
 		DoubleMatrix curr_w = ((HiddenLayerParam)curr_param).w;
     	DoubleMatrix curr_hbias = ((HiddenLayerParam)curr_param).hbias;
     	DoubleMatrix curr_vbias = ((HiddenLayerParam)curr_param).vbias;
