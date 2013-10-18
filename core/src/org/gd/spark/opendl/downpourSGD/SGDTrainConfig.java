@@ -80,10 +80,15 @@ public class SGDTrainConfig implements Serializable {
     public double sparsityBeta = 0.01;
 
     /**
-     * for dA
+     * for AutoEncoder denoising
      */
     public boolean doCorruption = true;
     public double corruption_level = 0.3;
+    
+    /**
+     * for RBM fast CD1 algorithm by Hinton
+     */
+    public boolean useHintonCD1 = true;
 
     /**
      * use ConjugateGradient on front step

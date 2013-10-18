@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.gd.spark.opendl.downpourSGD.bp;
+package org.gd.spark.opendl.downpourSGD.Backpropagation;
 
 import java.util.List;
 

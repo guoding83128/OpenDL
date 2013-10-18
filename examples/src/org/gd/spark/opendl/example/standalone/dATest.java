@@ -6,7 +6,7 @@ import java.util.List;
 import org.apache.log4j.Logger;
 import org.gd.spark.opendl.downpourSGD.SGDTrainConfig;
 import org.gd.spark.opendl.downpourSGD.SampleVector;
-import org.gd.spark.opendl.downpourSGD.hLayer.dA;
+import org.gd.spark.opendl.downpourSGD.Backpropagation.AutoEncoder;
 import org.gd.spark.opendl.downpourSGD.train.DownpourSGDTrain;
 import org.gd.spark.opendl.example.ClassVerify;
 import org.gd.spark.opendl.example.DataInput;
@@ -25,10 +25,10 @@ public class dATest {
 			List<SampleVector> testList = new ArrayList<SampleVector>();
 			DataInput.splitList(samples, trainList, testList, 0.7);
 			
-			dA da = new dA(x_feature, n_hidden);
+			AutoEncoder da = new AutoEncoder(x_feature, n_hidden);
             SGDTrainConfig config = new SGDTrainConfig();
             config.setUseCG(true);
-            config.setDoCorruption(true);
+            config.setDoCorruption(false);
             config.setCorruption_level(0.25);
             config.setCgEpochStep(50);
             config.setCgTolerance(0);

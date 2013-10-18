@@ -6,7 +6,7 @@ import java.util.List;
 import org.apache.log4j.Logger;
 import org.gd.spark.opendl.downpourSGD.SGDTrainConfig;
 import org.gd.spark.opendl.downpourSGD.SampleVector;
-import org.gd.spark.opendl.downpourSGD.lr.LR;
+import org.gd.spark.opendl.downpourSGD.Softmax.LR;
 import org.gd.spark.opendl.downpourSGD.train.DownpourSGDTrain;
 import org.gd.spark.opendl.example.ClassVerify;
 import org.gd.spark.opendl.example.DataInput;

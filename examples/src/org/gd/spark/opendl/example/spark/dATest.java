@@ -9,7 +9,7 @@ import org.apache.spark.api.java.JavaSparkContext;
 import org.apache.spark.storage.StorageLevel;
 import org.gd.spark.opendl.downpourSGD.SGDTrainConfig;
 import org.gd.spark.opendl.downpourSGD.SampleVector;
-import org.gd.spark.opendl.downpourSGD.hLayer.dA;
+import org.gd.spark.opendl.downpourSGD.TiedWeightLayer.AutoEncoder;
 import org.gd.spark.opendl.downpourSGD.train.DownpourSGDTrain;
 import org.gd.spark.opendl.example.ClassVerify;
 import org.gd.spark.opendl.example.DataInput;
@@ -33,7 +33,7 @@ public class dATest {
 			rdds.count();
 			logger.info("RDD ok.");
 			
-			dA da = new dA(x_feature, n_hidden);
+			AutoEncoder da = new AutoEncoder(x_feature, n_hidden);
             SGDTrainConfig config = new SGDTrainConfig();
             config.setUseCG(true);
             config.setDoCorruption(true);

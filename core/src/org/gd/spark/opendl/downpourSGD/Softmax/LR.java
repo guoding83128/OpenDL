@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.gd.spark.opendl.downpourSGD.lr;
+package org.gd.spark.opendl.downpourSGD.Softmax;
 
 import java.io.DataInput;
 import java.io.DataOutput;

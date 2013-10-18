@@ -9,7 +9,7 @@ import org.apache.spark.api.java.JavaSparkContext;
 import org.apache.spark.storage.StorageLevel;
 import org.gd.spark.opendl.downpourSGD.SGDTrainConfig;
 import org.gd.spark.opendl.downpourSGD.SampleVector;
-import org.gd.spark.opendl.downpourSGD.hLayer.RBM;
+import org.gd.spark.opendl.downpourSGD.TiedWeightLayer.RBM;
 import org.gd.spark.opendl.downpourSGD.train.DownpourSGDTrain;
 import org.gd.spark.opendl.example.ClassVerify;
 import org.gd.spark.opendl.example.DataInput;

@@ -6,7 +6,7 @@ import java.util.List;
 import org.apache.log4j.Logger;
 import org.gd.spark.opendl.downpourSGD.SGDTrainConfig;
 import org.gd.spark.opendl.downpourSGD.SampleVector;
-import org.gd.spark.opendl.downpourSGD.hLayer.RBM;
+import org.gd.spark.opendl.downpourSGD.TiedWeightLayer.RBM;
 import org.gd.spark.opendl.downpourSGD.train.DownpourSGDTrain;
 import org.gd.spark.opendl.example.ClassVerify;
 import org.gd.spark.opendl.example.DataInput;
@@ -30,7 +30,7 @@ public class RBMTest {
             config.setUseCG(true);
             config.setCgEpochStep(50);
             config.setCgTolerance(0);
-            config.setCgMaxIterations(10);
+            config.setCgMaxIterations(30);
             config.setMaxEpochs(50);
             config.setNbrModelReplica(4);
             config.setMinLoss(0.01);
